@@ -1,16 +1,16 @@
 import Link from "next/link"
 
 const APPS = [
-  { name: "TikTok",        icon: "https://cdn.simpleicons.org/tiktok/ffffff",             bg: "#010101" },
-  { name: "Instagram",     icon: "https://cdn.simpleicons.org/instagram/ffffff",           bg: "#E1306C" },
-  { name: "YouTube",       icon: "https://cdn.simpleicons.org/youtube/ffffff",             bg: "#FF0000" },
-  { name: "CapCut",        icon: "https://cdn.simpleicons.org/capcut/ffffff",              bg: "#1C1C1C" },
-  { name: "Canva",         icon: "https://cdn.simpleicons.org/canva/ffffff",               bg: "#00C4CC" },
-  { name: "Premiere Pro",  icon: "https://cdn.simpleicons.org/adobepremierepro/ffffff",    bg: "#9999FF" },
-  { name: "After Effects", icon: "https://cdn.simpleicons.org/adobeaftereffects/ffffff",   bg: "#9999FF" },
-  { name: "DaVinci",       icon: "https://cdn.simpleicons.org/davinciresolve/ffffff",      bg: "#233A51" },
-  { name: "Final Cut Pro", icon: "https://cdn.simpleicons.org/apple/ffffff",               bg: "#FC3B2F" },
-  { name: "iMovie",        icon: "https://cdn.simpleicons.org/apple/ffffff",               bg: "#3E9BFF" },
+  { name: "TikTok",        icon: "https://cdn.simpleicons.org/tiktok/ffffff",           bg: "#010101" },
+  { name: "Instagram",     icon: "https://cdn.simpleicons.org/instagram/ffffff",         bg: "#E1306C" },
+  { name: "YouTube",       icon: "https://cdn.simpleicons.org/youtube/ffffff",           bg: "#FF0000" },
+  { name: "Canva",         icon: "https://cdn.simpleicons.org/canva/ffffff",             bg: "#00C4CC" },
+  { name: "DaVinci Resolve", icon: "https://cdn.simpleicons.org/davinciresolve/ffffff",  bg: "#233A51" },
+  { name: "Snapchat",      icon: "https://cdn.simpleicons.org/snapchat/ffffff",          bg: "#FFFC00", dark: true },
+  { name: "Pinterest",     icon: "https://cdn.simpleicons.org/pinterest/ffffff",         bg: "#E60023" },
+  { name: "Facebook",      icon: "https://cdn.simpleicons.org/facebook/ffffff",          bg: "#1877F2" },
+  { name: "X / Twitter",   icon: "https://cdn.simpleicons.org/x/ffffff",                bg: "#000000" },
+  { name: "Shopify",       icon: "https://cdn.simpleicons.org/shopify/ffffff",           bg: "#96BF48" },
 ]
 
 const MOCK_IMAGES = [
@@ -104,21 +104,21 @@ export default function TheSolution() {
         </div>
       </div>
 
-      {/* Works with */}
-      <div className="max-w-[1100px] mx-auto px-6 mt-16 pt-10 border-t border-gray-100">
-        <div className="flex items-center gap-8 flex-wrap">
-          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] shrink-0">Works with</span>
-          <div className="flex items-center gap-4 flex-wrap">
-            {APPS.map(app => (
-              <div key={app.name} className="flex items-center gap-2">
+      {/* Works with — infinite marquee */}
+      <div className="mt-16 pt-10 border-t border-gray-100">
+        <p className="text-center text-[11px] font-semibold text-gray-400 uppercase tracking-[0.15em] mb-8">Works with</p>
+        <div className="overflow-hidden w-full">
+          <div className="marquee" style={{ gap: 32 }}>
+            {[...APPS, ...APPS].map((app, i) => (
+              <div key={i} className="flex items-center gap-2.5 shrink-0">
                 <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: app.bg }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={app.icon} alt={app.name} width={15} height={15} />
+                  <img src={app.icon} alt={app.name} width={17} height={17} />
                 </div>
-                <span className="text-[13px] font-semibold text-gray-500">{app.name}</span>
+                <span className="text-[13.5px] font-semibold text-gray-500 whitespace-nowrap">{app.name}</span>
               </div>
             ))}
           </div>
