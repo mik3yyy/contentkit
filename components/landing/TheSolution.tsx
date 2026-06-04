@@ -1,6 +1,17 @@
 import Link from "next/link"
 
-const WORKS_WITH = ["iMovie","CapCut","Canva","TikTok","Premiere Pro","After Effects","Instagram","DaVinci Resolve","Final Cut Pro","YouTube"]
+const APPS = [
+  { name: "TikTok",        icon: "https://cdn.simpleicons.org/tiktok/ffffff",             bg: "#010101" },
+  { name: "Instagram",     icon: "https://cdn.simpleicons.org/instagram/ffffff",           bg: "#E1306C" },
+  { name: "YouTube",       icon: "https://cdn.simpleicons.org/youtube/ffffff",             bg: "#FF0000" },
+  { name: "CapCut",        icon: "https://cdn.simpleicons.org/capcut/ffffff",              bg: "#1C1C1C" },
+  { name: "Canva",         icon: "https://cdn.simpleicons.org/canva/ffffff",               bg: "#00C4CC" },
+  { name: "Premiere Pro",  icon: "https://cdn.simpleicons.org/adobepremierepro/ffffff",    bg: "#9999FF" },
+  { name: "After Effects", icon: "https://cdn.simpleicons.org/adobeaftereffects/ffffff",   bg: "#9999FF" },
+  { name: "DaVinci",       icon: "https://cdn.simpleicons.org/davinciresolve/ffffff",      bg: "#233A51" },
+  { name: "Final Cut Pro", icon: "https://cdn.simpleicons.org/apple/ffffff",               bg: "#FC3B2F" },
+  { name: "iMovie",        icon: "https://cdn.simpleicons.org/apple/ffffff",               bg: "#3E9BFF" },
+]
 
 const MOCK_IMAGES = [
   "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=90&h=130&fit=crop&q=60",
@@ -97,9 +108,18 @@ export default function TheSolution() {
       <div className="max-w-[1100px] mx-auto px-6 mt-16 pt-10 border-t border-gray-100">
         <div className="flex items-center gap-8 flex-wrap">
           <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] shrink-0">Works with</span>
-          <div className="flex items-center gap-6 flex-wrap">
-            {WORKS_WITH.map(w => (
-              <span key={w} className="text-[13px] font-semibold text-gray-400">{w}</span>
+          <div className="flex items-center gap-4 flex-wrap">
+            {APPS.map(app => (
+              <div key={app.name} className="flex items-center gap-2">
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: app.bg }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={app.icon} alt={app.name} width={15} height={15} />
+                </div>
+                <span className="text-[13px] font-semibold text-gray-500">{app.name}</span>
+              </div>
             ))}
           </div>
         </div>
