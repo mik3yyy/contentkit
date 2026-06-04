@@ -3,12 +3,9 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { Suspense } from "react"
 
-function SignInForm() {
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard"
+export default function SignUpPage() {
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -18,12 +15,27 @@ function SignInForm() {
     e.preventDefault()
     setLoading(true)
     setError("")
-    const res = await signIn("credentials", { email, password, callbackUrl, redirect: false })
-    if (res?.error) {
-      setError("Invalid email or password")
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, name }),
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error ?? "Something went wrong")
       setLoading(false)
-    } else if (res?.url) {
-      window.location.href = res.url
+      return
+    }
+
+    // Auto sign-in after registration
+    const signInRes = await signIn("credentials", { email, password, callbackUrl: "/dashboard", redirect: false })
+    if (signInRes?.url) {
+      window.location.href = signInRes.url
+    } else {
+      setError("Account created. Please sign in.")
+      setLoading(false)
     }
   }
 
@@ -41,10 +53,21 @@ function SignInForm() {
           <span className="font-bold text-[17px] tracking-tight">ContentKit</span>
         </Link>
 
-        <h1 className="text-[24px] font-bold text-black mb-1">Welcome back</h1>
-        <p className="text-[14px] text-gray-500 mb-8">Sign in to access your content library.</p>
+        <h1 className="text-[24px] font-bold text-black mb-1">Create your account</h1>
+        <p className="text-[14px] text-gray-500 mb-8">Already purchased? Set up your login here.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Name</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Your name"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+            />
+          </div>
           <div>
             <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Email</label>
             <input
@@ -61,9 +84,10 @@ function SignInForm() {
             <input
               type="password"
               required
+              minLength={8}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Min 8 characters"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
             />
           </div>
@@ -75,27 +99,15 @@ function SignInForm() {
             disabled={loading}
             className="w-full bg-black text-white font-bold text-[14px] py-3.5 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-40 mt-2"
           >
-            {loading ? "Signing in..." : "Sign in →"}
+            {loading ? "Creating account..." : "Create account →"}
           </button>
         </form>
 
         <p className="text-[13px] text-gray-400 mt-6 text-center">
-          Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-black font-semibold hover:underline">Create one</Link>
-        </p>
-        <p className="text-[13px] text-gray-400 mt-2 text-center">
-          Need access?{" "}
-          <Link href="/#pricing" className="text-black font-semibold hover:underline">Get ContentKit</Link>
+          Already have an account?{" "}
+          <Link href="/sign-in" className="text-black font-semibold hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
-  )
-}
-
-export default function SignInPage() {
-  return (
-    <Suspense>
-      <SignInForm />
-    </Suspense>
   )
 }

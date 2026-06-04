@@ -1,19 +1,34 @@
 import NextAuth from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
+import Credentials from "next-auth/providers/credentials"
+import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/db"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      checks: ["state"],
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email as string
+        const password = credentials?.password as string
+        if (!email || !password) return null
+
+        if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+          return { id: "demo", email, name: email.split("@")[0] }
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user?.password) return null
+        const valid = await bcrypt.compare(password, user.password)
+        if (!valid) return null
+        return { id: user.id, email: user.email, name: user.name ?? undefined }
+      },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token }) {
       if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
@@ -27,39 +42,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             select: { hasPaid: true },
           })
           token.hasPaid = user?.hasPaid ?? false
-        } catch (e) {
-          console.error("jwt DB error:", e)
+        } catch {
           token.hasPaid = false
         }
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.hasPaid = token.hasPaid as boolean
-      }
+      if (session.user) session.user.hasPaid = token.hasPaid as boolean
       return session
     },
-    async signIn({ user }) {
-      if (!user.email) return false
-      if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") return true
-      try {
-        await prisma.user.upsert({
-          where: { email: user.email },
-          update: { name: user.name, image: user.image },
-          create: {
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          },
-        })
-      } catch (e) {
-        console.error("signIn DB error:", e)
-      }
-      return true
-    },
   },
-  pages: {
-    signIn: "/sign-in",
-  },
+  pages: { signIn: "/sign-in" },
 })

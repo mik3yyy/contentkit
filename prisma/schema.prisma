@@ -12,6 +12,7 @@ model User {
   email           String     @unique
   name            String?
   image           String?
+  password        String?
   hasPaid         Boolean    @default(false)
   paidAt          DateTime?
   stripePaymentId String?
