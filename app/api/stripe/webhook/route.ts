@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
 
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object
-    const email = pi.metadata?.email
+    // Email comes from receipt_email (set by Stripe after payment) or metadata
+    const email = pi.receipt_email ?? pi.metadata?.email
     if (email) {
       await prisma.user.upsert({
         where: { email },
