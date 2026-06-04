@@ -43,7 +43,8 @@ export default async function LibraryPage({
   })
   const allTags = [...new Set(ebookRows.flatMap(r => r.tags))].sort()
 
-  const where: Parameters<typeof prisma.content.findMany>[0]["where"] = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {
     ...(niche && niche !== "all" ? { niche } : {}),
     ...(type  && type  !== "all" ? { type  } : {}),
     ...(tag   ? { tags: { has: tag } } : {}),
