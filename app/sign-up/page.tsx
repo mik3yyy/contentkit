@@ -3,10 +3,14 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
+import { useSearchParams, Suspense } from "react"
 
-export default function SignUpPage() {
+function SetupForm() {
+  const searchParams = useSearchParams()
+  const prefillEmail = searchParams.get("email") ?? ""
+
   const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(prefillEmail)
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -29,8 +33,13 @@ export default function SignUpPage() {
       return
     }
 
-    // Auto sign-in after registration
-    const signInRes = await signIn("credentials", { email, password, callbackUrl: "/dashboard", redirect: false })
+    const signInRes = await signIn("credentials", {
+      email,
+      password,
+      callbackUrl: "/dashboard",
+      redirect: false,
+    })
+
     if (signInRes?.url) {
       window.location.href = signInRes.url
     } else {
@@ -41,7 +50,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-[#eeecea] flex items-center justify-center px-4">
-      <div className="bg-white rounded-3xl p-10 w-full max-w-[400px] shadow-lg border border-gray-100">
+      <div className="bg-white rounded-3xl p-10 w-full max-w-[420px] shadow-lg border border-gray-100">
         <Link href="/" className="inline-flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
             <svg width="16" height="16" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -53,8 +62,15 @@ export default function SignUpPage() {
           <span className="font-bold text-[17px] tracking-tight">ContentKit</span>
         </Link>
 
-        <h1 className="text-[24px] font-bold text-black mb-1">Create your account</h1>
-        <p className="text-[14px] text-gray-500 mb-8">Already purchased? Set up your login here.</p>
+        <div className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-full px-3 py-1 mb-5">
+          <svg width="12" height="12" fill="none" stroke="#16a34a" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span className="text-[11px] font-semibold text-green-700">Payment confirmed</span>
+        </div>
+
+        <h1 className="text-[24px] font-bold text-black mb-1">Set up your account</h1>
+        <p className="text-[14px] text-gray-500 mb-8">
+          Use the <strong className="text-black">email you paid with</strong> and create a password to access your library.
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -69,7 +85,9 @@ export default function SignUpPage() {
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Email</label>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+              Email used for payment
+            </label>
             <input
               type="email"
               required
@@ -80,7 +98,9 @@ export default function SignUpPage() {
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Password</label>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+              Create a password
+            </label>
             <input
               type="password"
               required
@@ -92,22 +112,34 @@ export default function SignUpPage() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-[13px]">{error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-[13px] text-red-600">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-black text-white font-bold text-[14px] py-3.5 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-40 mt-2"
           >
-            {loading ? "Creating account..." : "Create account →"}
+            {loading ? "Setting up..." : "Access my library →"}
           </button>
         </form>
 
         <p className="text-[13px] text-gray-400 mt-6 text-center">
-          Already have an account?{" "}
+          Already set up your account?{" "}
           <Link href="/sign-in" className="text-black font-semibold hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense>
+      <SetupForm />
+    </Suspense>
   )
 }

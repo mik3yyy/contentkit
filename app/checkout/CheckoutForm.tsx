@@ -29,7 +29,7 @@ function PaymentForm() {
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/sign-in?callbackUrl=/dashboard`,
+        return_url: `${window.location.origin}/sign-up`,
       },
     })
 
@@ -78,7 +78,7 @@ function DemoForm() {
 
   const handleDemo = (e: React.FormEvent) => {
     e.preventDefault()
-    window.location.href = "/sign-in?callbackUrl=/dashboard"
+    window.location.href = "/sign-up"
   }
 
   return (
