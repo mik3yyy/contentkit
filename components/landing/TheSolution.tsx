@@ -125,7 +125,13 @@ export default function TheSolution() {
       <div className="max-w-[1100px] mx-auto px-6 mt-16 pt-10 border-t border-gray-100">
         <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.15em] mb-8">Works with</p>
       </div>
-      <div className="overflow-hidden w-full">
+      <div
+        className="overflow-hidden w-full"
+        style={{
+          maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+        }}
+      >
           <div className="marquee" style={{ gap: 32 }}>
             {[...APPS, ...APPS].map((app, i) => (
               <div key={i} className="flex items-center gap-2.5 shrink-0">

@@ -25,7 +25,13 @@ export default function MarqueeStrip({
   const doubled = [...images, ...images]
 
   return (
-    <div className="overflow-hidden w-full">
+    <div
+      className="overflow-hidden w-full"
+      style={{
+        maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+      }}
+    >
       <div className={`${cls} px-3`} style={{ gap }}>
         {doubled.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
