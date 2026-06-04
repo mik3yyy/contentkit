@@ -7,7 +7,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await auth()
 
   if (!session) redirect("/sign-in")
-  if (!session.user?.hasPaid) redirect("/checkout")
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
+  if (!isDemo && !session.user?.hasPaid) redirect("/checkout")
 
   return (
     <div className="bg-white min-h-screen">
