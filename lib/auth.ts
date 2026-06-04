@@ -15,11 +15,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token }) {
       if (token.email) {
-        const user = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: { hasPaid: true },
-        })
-        token.hasPaid = user?.hasPaid ?? false
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { hasPaid: true },
+          })
+          token.hasPaid = user?.hasPaid ?? false
+        } catch (e) {
+          console.error("jwt DB error:", e)
+          token.hasPaid = false
+        }
       }
       return token
     },
@@ -31,15 +36,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async signIn({ user }) {
       if (!user.email) return false
-      await prisma.user.upsert({
-        where: { email: user.email },
-        update: { name: user.name, image: user.image },
-        create: {
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        },
-      })
+      try {
+        await prisma.user.upsert({
+          where: { email: user.email },
+          update: { name: user.name, image: user.image },
+          create: {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          },
+        })
+      } catch (e) {
+        console.error("signIn DB error:", e)
+      }
       return true
     },
   },
