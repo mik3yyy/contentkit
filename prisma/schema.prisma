@@ -26,9 +26,10 @@ model Content {
   title         String
   type          String
   niche         String
-  r2Key         String
+  r2Key         String     @unique
   thumbnailUrl  String?
   fileSizeBytes Int?
+  durationSeconds Int?
   favorites     Favorite[]
   downloads     Download[]
   createdAt     DateTime   @default(now())
