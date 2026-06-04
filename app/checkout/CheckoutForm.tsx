@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 
@@ -29,7 +29,7 @@ function PaymentForm() {
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/dashboard?payment=success`,
+        return_url: `${window.location.origin}/sign-in?callbackUrl=/dashboard`,
       },
     })
 
@@ -41,8 +41,7 @@ function PaymentForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2 className="text-[20px] font-bold text-black mb-6">Payment details</h2>
-      <PaymentElement className="mb-6" />
+      <PaymentElement className="mb-6" options={{ layout: "accordion" }} />
       {error && <p className="text-red-500 text-[13px] mb-4">{error}</p>}
       <button
         type="submit"
@@ -56,14 +55,51 @@ function PaymentForm() {
   )
 }
 
-export default function CheckoutForm({ userEmail }: { userEmail: string }) {
+export default function CheckoutForm() {
+  const [email, setEmail] = useState("")
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    fetch("/api/stripe/create-payment-intent", { method: "POST" })
-      .then(r => r.json())
-      .then(data => setClientSecret(data.clientSecret))
-  }, [userEmail])
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    const res = await fetch("/api/stripe/create-payment-intent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+    const data = await res.json()
+    setClientSecret(data.clientSecret)
+    setEmailSubmitted(true)
+    setLoading(false)
+  }
+
+  if (!emailSubmitted) {
+    return (
+      <form onSubmit={handleEmailSubmit}>
+        <h2 className="text-[20px] font-bold text-black mb-1">Get instant access</h2>
+        <p className="text-[13px] text-gray-400 mb-6">Enter your email to continue to payment</p>
+        <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Email</label>
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] mb-5 focus:outline-none focus:ring-2 focus:ring-black"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-black text-white font-bold text-[15px] py-4 rounded-2xl hover:bg-gray-900 transition-colors disabled:opacity-50"
+        >
+          {loading ? "Loading..." : "Continue to payment →"}
+        </button>
+      </form>
+    )
+  }
 
   if (!clientSecret) {
     return (

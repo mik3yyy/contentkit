@@ -1,17 +1,16 @@
 import { NextRequest } from "next/server"
-import { auth } from "@/lib/auth"
 import { getStripe, PRICE_CENTS } from "@/lib/stripe"
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.email) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 })
+  const { email } = await req.json()
+  if (!email) {
+    return Response.json({ error: "Email required" }, { status: 400 })
   }
 
   const paymentIntent = await getStripe().paymentIntents.create({
     amount: PRICE_CENTS,
     currency: "usd",
-    metadata: { email: session.user.email },
+    metadata: { email },
     automatic_payment_methods: { enabled: true },
   })
 

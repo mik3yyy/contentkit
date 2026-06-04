@@ -23,9 +23,15 @@ export async function POST(req: NextRequest) {
     const pi = event.data.object
     const email = pi.metadata?.email
     if (email) {
-      await prisma.user.update({
+      await prisma.user.upsert({
         where: { email },
-        data: {
+        update: {
+          hasPaid: true,
+          paidAt: new Date(),
+          stripePaymentId: pi.id,
+        },
+        create: {
+          email,
           hasPaid: true,
           paidAt: new Date(),
           stripePaymentId: pi.id,

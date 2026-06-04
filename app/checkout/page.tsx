@@ -1,18 +1,6 @@
 import CheckoutForm from "./CheckoutForm"
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
 
-export default async function CheckoutPage() {
-  const session = await auth()
-
-  if (!session) {
-    redirect("/sign-in?callbackUrl=/checkout")
-  }
-
-  if (session.user?.hasPaid) {
-    redirect("/dashboard")
-  }
-
+export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#eeecea] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-[1000px] grid grid-cols-2 gap-12 items-start">
@@ -58,7 +46,7 @@ export default async function CheckoutPage() {
 
         {/* Right: payment form */}
         <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
-          <CheckoutForm userEmail={session.user?.email ?? ""} />
+          <CheckoutForm />
         </div>
       </div>
     </div>
