@@ -76,15 +76,8 @@ function DemoForm() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleDemo = async (e: React.FormEvent) => {
+  const handleDemo = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
-    setLoading(true)
-    await fetch("/api/demo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    })
     window.location.href = "/sign-in?callbackUrl=/dashboard"
   }
 

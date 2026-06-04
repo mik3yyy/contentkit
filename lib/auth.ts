@@ -14,6 +14,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token }) {
+      if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+        token.hasPaid = true
+        return token
+      }
       if (token.email) {
         try {
           const user = await prisma.user.findUnique({
@@ -36,6 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async signIn({ user }) {
       if (!user.email) return false
+      if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") return true
       try {
         await prisma.user.upsert({
           where: { email: user.email },
