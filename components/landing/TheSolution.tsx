@@ -141,7 +141,6 @@ export default function TheSolution() {
             ))}
           </div>
         </div>
-      </div>
     </section>
   )
 }
