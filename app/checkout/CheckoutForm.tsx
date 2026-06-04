@@ -41,16 +41,31 @@ function PaymentForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <PaymentElement className="mb-6" options={{ layout: "accordion" }} />
-      {error && <p className="text-red-500 text-[13px] mb-4">{error}</p>}
+      <div className="mb-1">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-gray-400">Payment</span>
+          <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-gray-300">Stripe</span>
+        </div>
+        <PaymentElement options={{ layout: "accordion" }} />
+      </div>
+      {error && <p className="text-red-500 text-[12px] mt-3">{error}</p>}
       <button
         type="submit"
         disabled={loading || !stripe}
-        className="w-full bg-black text-white font-bold text-[15px] py-4 rounded-2xl hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full mt-5 bg-black text-white font-bold text-[14px] py-4 rounded-2xl hover:bg-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        {loading ? "Processing..." : "Pay $97 — Get instant access"}
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        {loading ? "Processing..." : "Pay & unlock the vault →"}
       </button>
-      <p className="text-[12px] text-gray-400 text-center mt-3">Secured by Stripe · 30-day money-back guarantee</p>
+      <div className="flex items-center justify-center gap-4 mt-3 text-[10.5px] text-gray-400 font-medium">
+        <span>Secure · 256-bit</span>
+        <span>·</span>
+        <span>Encrypted payments</span>
+        <span>·</span>
+        <span>30-day refund</span>
+      </div>
     </form>
   )
 }
@@ -79,24 +94,40 @@ export default function CheckoutForm() {
   if (!emailSubmitted) {
     return (
       <form onSubmit={handleEmailSubmit}>
-        <h2 className="text-[20px] font-bold text-black mb-1">Get instant access</h2>
-        <p className="text-[13px] text-gray-400 mb-6">Enter your email to continue to payment</p>
-        <label className="block text-[13px] font-medium text-gray-700 mb-1.5">Email</label>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[14px] mb-5 focus:outline-none focus:ring-2 focus:ring-black"
-        />
+        <label className="block text-[10px] font-bold tracking-[0.12em] uppercase text-gray-400 mb-1.5">
+          Email
+        </label>
+        <div className="flex items-center border border-gray-200 rounded-xl px-3.5 py-3 gap-2.5 mb-5 focus-within:ring-2 focus-within:ring-black focus-within:border-transparent transition-all">
+          <svg width="14" height="14" fill="none" stroke="#9ca3af" strokeWidth="1.8" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="contact@example.com"
+            className="flex-1 text-[13.5px] text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white font-bold text-[15px] py-4 rounded-2xl hover:bg-gray-900 transition-colors disabled:opacity-50"
+          className="w-full bg-black text-white font-bold text-[14px] py-4 rounded-2xl hover:bg-gray-900 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
         >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
           {loading ? "Loading..." : "Continue to payment →"}
         </button>
+        <div className="flex items-center justify-center gap-4 mt-3 text-[10.5px] text-gray-400 font-medium">
+          <span>Secure · 256-bit</span>
+          <span>·</span>
+          <span>Encrypted payments</span>
+          <span>·</span>
+          <span>30-day refund</span>
+        </div>
       </form>
     )
   }
@@ -104,7 +135,7 @@ export default function CheckoutForm() {
   if (!clientSecret) {
     return (
       <div className="flex items-center justify-center h-40">
-        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }

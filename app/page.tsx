@@ -11,22 +11,23 @@ import FAQ from "@/components/landing/FAQ"
 import DarkCTA from "@/components/landing/DarkCTA"
 import Footer from "@/components/landing/Footer"
 import StickyBar from "@/components/landing/StickyBar"
+import FadeIn from "@/components/ui/FadeIn"
 
 export default function LandingPage() {
   return (
     <div className="bg-[#eeecea]">
       <Navbar />
       <Hero />
-      <AsSeenOn />
-      <ForCreatorsResellers />
-      <TheProblem />
-      <TheSolution />
-      <WhatsInside />
-      <NichesSection />
-      <Pricing />
-      <FAQ />
-      <DarkCTA />
-      <Footer />
+      <FadeIn><AsSeenOn /></FadeIn>
+      <FadeIn><ForCreatorsResellers /></FadeIn>
+      <FadeIn><TheProblem /></FadeIn>
+      <FadeIn><TheSolution /></FadeIn>
+      <FadeIn><WhatsInside /></FadeIn>
+      <FadeIn><NichesSection /></FadeIn>
+      <FadeIn><Pricing /></FadeIn>
+      <FadeIn><FAQ /></FadeIn>
+      <FadeIn><DarkCTA /></FadeIn>
+      <FadeIn><Footer /></FadeIn>
       <StickyBar />
     </div>
   )
