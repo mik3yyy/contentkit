@@ -159,18 +159,21 @@ export default function Testimonials() {
       <div className="max-w-[1100px] mx-auto px-6">
 
         {/* Header */}
-        <div className="grid grid-cols-2 gap-16 items-start mb-20">
+        <div className="grid grid-cols-[1fr_380px] gap-12 items-start mb-20">
           <div>
             <div className="inline-flex items-center border border-gray-300 rounded-full px-4 py-1 mb-6">
               <span className="text-[10.5px] font-semibold text-gray-500 uppercase tracking-[0.15em]">Creator Reviews</span>
             </div>
-            <h2 className="text-[46px] leading-[1.05] tracking-tight">
-              <span className="font-black text-black">Different creators,</span>{" "}
-              <span className="font-light italic text-gray-400">different use cases, same vault.</span>
+            <h2 className="text-[38px] leading-[1.1] tracking-tight">
+              <span className="font-black text-black">Different creators,</span>
+              <br />
+              <span className="font-light italic text-gray-400">different use cases,</span>
+              <br />
+              <span className="font-light italic text-gray-400">same vault.</span>
             </h2>
           </div>
-          <div className="pt-4">
-            <p className="text-[16px] text-gray-500 leading-relaxed">
+          <div className="pt-14">
+            <p className="text-[15px] text-gray-500 leading-relaxed">
               Faceless page owners, ad buyers, agency owners, and resellers all pull from the same vault. Same clips, different angles — theme pages, ads, client work, or clip packs of their own.
             </p>
           </div>
@@ -178,13 +181,13 @@ export default function Testimonials() {
 
         {/* Staggered 3-column grid */}
         <div className="grid grid-cols-3 gap-5 items-start">
-          <div ref={colRef1} className="flex flex-col gap-5 mt-10 will-change-transform">
+          <div ref={colRef1} className="flex flex-col gap-5 mt-0 will-change-transform">
             {col1.map((r, i) => <ReviewCard key={i} review={r} index={i} />)}
           </div>
-          <div ref={colRef2} className="flex flex-col gap-5 -mt-8 will-change-transform">
+          <div ref={colRef2} className="flex flex-col gap-5 mt-12 will-change-transform">
             {col2.map((r, i) => <ReviewCard key={i} review={r} index={i} />)}
           </div>
-          <div ref={colRef3} className="flex flex-col gap-5 mt-16 will-change-transform">
+          <div ref={colRef3} className="flex flex-col gap-5 mt-6 will-change-transform">
             {col3.map((r, i) => <ReviewCard key={i} review={r} index={i} />)}
           </div>
         </div>
