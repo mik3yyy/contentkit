@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { useSearchParams, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 
 function SetupForm() {
   const searchParams = useSearchParams()
