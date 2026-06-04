@@ -70,8 +70,59 @@ function PaymentForm() {
   )
 }
 
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
+
+function DemoForm() {
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleDemo = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    await fetch("/api/demo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+    window.location.href = "/sign-in?callbackUrl=/dashboard"
+  }
+
+  return (
+    <form onSubmit={handleDemo}>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-5 text-[12px] text-amber-700 font-medium">
+        Demo mode — no payment required
+      </div>
+      <label className="block text-[10px] font-bold tracking-[0.12em] uppercase text-gray-400 mb-1.5">Your email</label>
+      <div className="flex items-center border border-gray-200 rounded-xl px-3.5 py-3 gap-2.5 mb-5 focus-within:ring-2 focus-within:ring-black transition-all">
+        <svg width="14" height="14" fill="none" stroke="#9ca3af" strokeWidth="1.8" viewBox="0 0 24 24">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="flex-1 text-[13.5px] text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-black text-white font-bold text-[14px] py-4 rounded-2xl hover:bg-gray-900 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+      >
+        {loading ? "Granting access..." : "Get free demo access →"}
+      </button>
+    </form>
+  )
+}
+
 export default function CheckoutForm() {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+
+  if (DEMO_MODE) return <DemoForm />
 
   useEffect(() => {
     fetch("/api/stripe/create-payment-intent", { method: "POST" })
