@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const REVIEWS = [
   {
@@ -14,30 +14,30 @@ const REVIEWS = [
   },
   {
     stars: 5,
-    quote: "I honestly could not recommend this bundle more. Very excited about using it moving forward. The platform is a lot smoother than the Drive folders other sellers send you.",
-    name: "Carlos R.",
-    role: "Content Creator",
-    avatar: "C",
-    statLabel: "Clips used this month",
-    statValue: "340+",
-  },
-  {
-    stars: 5,
-    quote: "Didn't expect to use it this much. Pulled clips for three separate niches in one sitting. The search actually works, which is more than I can say for most bundles.",
-    name: "Aisha T.",
-    role: "Faceless Page Owner",
-    avatar: "A",
-    statLabel: "Pages managed",
-    statValue: "4",
-  },
-  {
-    stars: 5,
     quote: "Used the templates as freebies for the newsletter — added 800 subscribers in two weeks. The rebrandable stuff alone is worth the price.",
     name: "Chris M.",
     role: "Newsletter Creator",
     avatar: "C",
     statLabel: "Subscribers in 14 days",
     statValue: "+800",
+  },
+  {
+    stars: 5,
+    quote: "My ad creatives went from embarrassing to actually competitive. The 4K clips especially — I was paying $40 per clip from stock sites before this.",
+    name: "Sofia D.",
+    role: "Paid Ads Buyer",
+    avatar: "S",
+    statLabel: "Ad accounts running",
+    statValue: "6",
+  },
+  {
+    stars: 5,
+    quote: "I honestly could not recommend this bundle more. The platform is a lot smoother than the Drive folders other sellers send you.",
+    name: "Carlos R.",
+    role: "Content Creator",
+    avatar: "C",
+    statLabel: "Clips used this month",
+    statValue: "340+",
   },
   {
     stars: 5,
@@ -59,6 +59,15 @@ const REVIEWS = [
   },
   {
     stars: 5,
+    quote: "Didn't expect to use it this much. Pulled clips for three separate niches in one sitting. The search actually works, which is more than I can say for most bundles.",
+    name: "Aisha T.",
+    role: "Faceless Page Owner",
+    avatar: "A",
+    statLabel: "Pages managed",
+    statValue: "4",
+  },
+  {
+    stars: 5,
     quote: "Bought it on a whim and ended up restructuring my whole offer around it. The ebooks gave me the lead magnets I'd been putting off making for six months.",
     name: "Priya S.",
     role: "Digital Product Seller",
@@ -68,21 +77,12 @@ const REVIEWS = [
   },
   {
     stars: 4,
-    quote: "Solid library. I spent a lot on editing assets in the past — individual packs that added up fast. This is just smarter. One payment and I stopped worrying about content.",
+    quote: "One payment and I stopped worrying about content. I was spending $600+ on individual stock packs. This just makes more sense.",
     name: "Jordan K.",
     role: "Video Editor",
     avatar: "J",
-    statLabel: "Saved vs. individual packs",
+    statLabel: "Saved vs. stock packs",
     statValue: "$600+",
-  },
-  {
-    stars: 5,
-    quote: "My ad creatives went from embarrassing to actually competitive. The 4K clips especially — I was paying $40 per clip from stock sites before this.",
-    name: "Sofia D.",
-    role: "Paid Ads Buyer",
-    avatar: "S",
-    statLabel: "Ad accounts running",
-    statValue: "6",
   },
 ]
 
@@ -98,18 +98,38 @@ function Stars({ count }: { count: number }) {
   )
 }
 
-function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: number }) {
+function ReviewCard({ review, delay }: { review: typeof REVIEWS[0]; delay: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div
+      ref={ref}
       className="bg-white rounded-3xl p-7 border border-gray-100 shadow-sm"
-      style={{ animationDelay: `${index * 80}ms` }}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(32px)",
+        transition: "opacity 0.6s ease, transform 0.6s ease",
+        transitionDelay: `${delay}ms`,
+      }}
     >
       <Stars count={review.stars} />
-      <p className="text-[14.5px] text-gray-700 leading-relaxed mb-6">
+      <p className="text-[14px] text-gray-700 leading-relaxed mb-6">
         &ldquo;{review.quote}&rdquo;
       </p>
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-[13px] font-bold text-gray-600 shrink-0">
+        <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-[13px] font-bold text-gray-600 shrink-0">
           {review.avatar}
         </div>
         <div>
@@ -117,7 +137,7 @@ function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: numbe
           <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{review.role}</div>
         </div>
       </div>
-      <div className="border-t border-gray-100 pt-4 space-y-1">
+      <div className="border-t border-gray-100 pt-4 space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{review.statLabel}</span>
           <span className="text-[13px] font-bold text-black">{review.statValue}</span>
@@ -136,30 +156,12 @@ export default function Testimonials() {
   const col2 = REVIEWS.filter((_, i) => i % 3 === 1)
   const col3 = REVIEWS.filter((_, i) => i % 3 === 2)
 
-  const colRef1 = useRef<HTMLDivElement>(null)
-  const colRef2 = useRef<HTMLDivElement>(null)
-  const colRef3 = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    let frame: number
-    const onScroll = () => {
-      frame = requestAnimationFrame(() => {
-        const sy = window.scrollY
-        if (colRef1.current) colRef1.current.style.transform = `translateY(${sy * 0.04}px)`
-        if (colRef2.current) colRef2.current.style.transform = `translateY(${sy * -0.03}px)`
-        if (colRef3.current) colRef3.current.style.transform = `translateY(${sy * 0.05}px)`
-      })
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(frame) }
-  }, [])
-
   return (
     <section className="bg-[#f5f4f2] py-24 overflow-hidden">
       <div className="max-w-[1100px] mx-auto px-6">
 
         {/* Header */}
-        <div className="grid grid-cols-[1fr_380px] gap-12 items-start mb-20">
+        <div className="grid grid-cols-[1fr_360px] gap-12 items-start mb-20">
           <div>
             <div className="inline-flex items-center border border-gray-300 rounded-full px-4 py-1 mb-6">
               <span className="text-[10.5px] font-semibold text-gray-500 uppercase tracking-[0.15em]">Creator Reviews</span>
@@ -179,16 +181,16 @@ export default function Testimonials() {
           </div>
         </div>
 
-        {/* Staggered 3-column grid */}
+        {/* Staggered 3-column grid — each card animates in on scroll */}
         <div className="grid grid-cols-3 gap-5 items-start">
-          <div ref={colRef1} className="flex flex-col gap-5 mt-0 will-change-transform">
-            {col1.map((r, i) => <ReviewCard key={i} review={r} index={i} />)}
+          <div className="flex flex-col gap-5">
+            {col1.map((r, i) => <ReviewCard key={i} review={r} delay={i * 100} />)}
           </div>
-          <div ref={colRef2} className="flex flex-col gap-5 mt-12 will-change-transform">
-            {col2.map((r, i) => <ReviewCard key={i} review={r} index={i} />)}
+          <div className="flex flex-col gap-5 mt-12">
+            {col2.map((r, i) => <ReviewCard key={i} review={r} delay={i * 100 + 60} />)}
           </div>
-          <div ref={colRef3} className="flex flex-col gap-5 mt-6 will-change-transform">
-            {col3.map((r, i) => <ReviewCard key={i} review={r} index={i} />)}
+          <div className="flex flex-col gap-5 mt-6">
+            {col3.map((r, i) => <ReviewCard key={i} review={r} delay={i * 100 + 30} />)}
           </div>
         </div>
 
