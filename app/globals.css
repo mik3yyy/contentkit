@@ -4,6 +4,10 @@
   --font-sans: var(--font-inter);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   font-family: var(--font-inter), Inter, system-ui, sans-serif;
 }
