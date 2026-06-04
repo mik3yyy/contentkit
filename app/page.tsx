@@ -6,6 +6,7 @@ import TheProblem from "@/components/landing/TheProblem"
 import TheSolution from "@/components/landing/TheSolution"
 import WhatsInside from "@/components/landing/WhatsInside"
 import NichesSection from "@/components/landing/NichesSection"
+import Testimonials from "@/components/landing/Testimonials"
 import Pricing from "@/components/landing/Pricing"
 import FAQ from "@/components/landing/FAQ"
 import DarkCTA from "@/components/landing/DarkCTA"
@@ -24,6 +25,7 @@ export default function LandingPage() {
       <FadeIn><TheSolution /></FadeIn>
       <FadeIn><WhatsInside /></FadeIn>
       <FadeIn><NichesSection /></FadeIn>
+      <FadeIn><Testimonials /></FadeIn>
       <FadeIn><Pricing /></FadeIn>
       <FadeIn><FAQ /></FadeIn>
       <FadeIn><DarkCTA /></FadeIn>
