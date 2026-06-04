@@ -1,11 +1,10 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Sidebar from "@/components/dashboard/Sidebar"
 import DashboardHeader from "@/components/dashboard/DashboardHeader"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   if (!session) redirect("/sign-in")
   if (!session.user?.hasPaid) redirect("/checkout")

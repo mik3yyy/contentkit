@@ -1,10 +1,9 @@
 import CheckoutForm from "./CheckoutForm"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export default async function CheckoutPage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   if (!session) {
     redirect("/sign-in?callbackUrl=/checkout")

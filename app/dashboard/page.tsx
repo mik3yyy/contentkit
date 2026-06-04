@@ -1,10 +1,9 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import Link from "next/link"
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const firstName = session?.user?.name?.split(" ")[0] ?? "there"
 
   const user = await prisma.user.findUnique({

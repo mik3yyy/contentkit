@@ -1,10 +1,9 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import Link from "next/link"
 
 export default async function DownloadsPage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const user = await prisma.user.findUnique({
     where: { email: session!.user!.email! },
     include: { downloads: { include: { content: true }, orderBy: { createdAt: "desc" } } },

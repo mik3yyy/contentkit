@@ -1,8 +1,8 @@
-import type { NextAuthOptions } from "next-auth"
+import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "@/lib/db"
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -31,7 +31,6 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user }) {
       if (!user.email) return false
-      // Upsert user on first sign-in
       await prisma.user.upsert({
         where: { email: user.email },
         update: { name: user.name, image: user.image },
@@ -47,4 +46,4 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/sign-in",
   },
-}
+})
