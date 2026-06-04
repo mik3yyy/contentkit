@@ -30,6 +30,7 @@ model Content {
   thumbnailUrl  String?
   fileSizeBytes Int?
   durationSeconds Int?
+  tags          String[]
   favorites     Favorite[]
   downloads     Download[]
   createdAt     DateTime   @default(now())
