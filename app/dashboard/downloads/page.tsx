@@ -10,12 +10,12 @@ export default async function DownloadsPage() {
   })
 
   return (
-    <div className="max-w-[1160px] mx-auto px-8 py-8">
-      <h1 className="text-[28px] font-bold text-black mb-1">Downloads</h1>
+    <div className="max-w-[1160px] mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+      <h1 className="text-[24px] md:text-[28px] font-bold text-black mb-1">Downloads</h1>
       <p className="text-[14px] text-gray-500 mb-8">{user?.downloads.length ?? 0} files downloaded</p>
 
       {!user?.downloads.length ? (
-        <div className="text-center py-24 border border-gray-200 rounded-2xl">
+        <div className="text-center py-20 border border-gray-200 rounded-2xl">
           <svg width="40" height="40" fill="none" stroke="#d1d5db" strokeWidth="1.5" viewBox="0 0 24 24" className="mx-auto mb-4">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -28,15 +28,28 @@ export default async function DownloadsPage() {
         </div>
       ) : (
         <div className="border border-gray-200 rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-[1fr_120px_120px_80px] text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-5 py-3 border-b border-gray-100">
-            <span>File</span><span>Type</span><span>Niche</span><span>Date</span>
+          {/* Header row — hide Type/Niche columns on mobile */}
+          <div className="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_100px_100px_80px] text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-4 sm:px-5 py-3 border-b border-gray-100">
+            <span>File</span>
+            <span className="hidden sm:block">Type</span>
+            <span className="hidden sm:block">Niche</span>
+            <span>Date</span>
           </div>
           {user.downloads.map((d: typeof user.downloads[0], i: number) => (
-            <div key={d.id} className={`grid grid-cols-[1fr_120px_120px_80px] items-center px-5 py-3.5 ${i < user.downloads.length - 1 ? "border-b border-gray-100" : ""}`}>
-              <span className="text-[14px] font-medium text-gray-900 truncate">{d.content.title}</span>
-              <span className="text-[12px] text-gray-500 capitalize">{d.content.type}</span>
-              <span className="text-[12px] text-gray-500 capitalize">{d.content.niche}</span>
-              <span className="text-[12px] text-gray-400">{new Date(d.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+            <div
+              key={d.id}
+              className={`grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_100px_100px_80px] items-center px-4 sm:px-5 py-3.5 gap-2 ${i < user.downloads.length - 1 ? "border-b border-gray-100" : ""}`}
+            >
+              <div className="min-w-0">
+                <div className="text-[13px] sm:text-[14px] font-medium text-gray-900 truncate">{d.content.title}</div>
+                {/* Show type + niche inline on mobile since columns are hidden */}
+                <div className="text-[11px] text-gray-400 capitalize sm:hidden mt-0.5">
+                  {d.content.type} · {d.content.niche}
+                </div>
+              </div>
+              <span className="hidden sm:block text-[12px] text-gray-500 capitalize">{d.content.type}</span>
+              <span className="hidden sm:block text-[12px] text-gray-500 capitalize">{d.content.niche}</span>
+              <span className="text-[12px] text-gray-400 shrink-0">{new Date(d.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
             </div>
           ))}
         </div>

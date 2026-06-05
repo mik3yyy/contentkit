@@ -293,7 +293,7 @@ interface DlState { status: string; active: boolean; done: boolean; error?: stri
 
 function DownloadProgress({ state, onClose, onCancel }: { state: DlState; onClose: () => void; onCancel: () => void }) {
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white rounded-2xl px-6 py-4 shadow-2xl min-w-[360px] max-w-[480px]">
+    <div className="fixed bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 bg-black text-white rounded-2xl px-5 py-4 shadow-2xl sm:min-w-[360px] sm:max-w-[480px]">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[13px] font-semibold">
           {state.done ? "ZIP ready — check your downloads" : state.status}
@@ -444,11 +444,11 @@ export default function LibraryClient({
   const cancelDownload = () => { cancelRef.current = true; setDlState(null) }
 
   return (
-    <div className="max-w-[1300px] mx-auto px-8 py-8">
+    <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
 
-      {/* Heading — larger */}
-      <div className="mb-10">
-        <h1 className="text-[46px] font-black text-black leading-tight tracking-tight">
+      {/* Heading */}
+      <div className="mb-7 md:mb-10">
+        <h1 className="text-[26px] sm:text-[34px] md:text-[46px] font-black text-black leading-tight tracking-tight">
           Browse the library.{" "}
           <span className="font-light italic text-gray-400">Drop straight into your launch.</span>
         </h1>
@@ -538,18 +538,19 @@ export default function LibraryClient({
 
       {/* Select mode bar */}
       {selecting && (
-        <div className="flex items-center gap-3 mb-5 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
           <span className="text-[13px] font-semibold text-gray-700">{selected.size} selected</span>
-          <button onClick={selectAll} className="text-[12px] text-gray-500 hover:text-black underline">Select all on page</button>
+          <button onClick={selectAll} className="text-[12px] text-gray-500 hover:text-black underline">All on page</button>
           <button onClick={clearAll}  className="text-[12px] text-gray-500 hover:text-black underline">Clear</button>
           {selected.size > 0 && (
             <div className="ml-auto">
               <button onClick={() => downloadSelected([...selected])} disabled={!!dlState?.active}
-                className="flex items-center gap-2 bg-black text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50">
+                className="flex items-center gap-2 bg-black text-white text-[13px] font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50">
                 <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Download {selected.size} as ZIP
+                <span className="hidden sm:inline">Download {selected.size} as ZIP</span>
+                <span className="sm:hidden">ZIP ({selected.size})</span>
               </button>
             </div>
           )}
@@ -565,11 +566,12 @@ export default function LibraryClient({
         </p>
         {!selecting && total > 0 && !isPending && (
           <button onClick={downloadAll} disabled={!!dlState?.active}
-            className="flex items-center gap-2 bg-black text-white text-[12.5px] font-semibold px-4 py-2 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex items-center gap-2 bg-black text-white text-[12.5px] font-semibold px-3 sm:px-4 py-2 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Download all as ZIP ({total.toLocaleString()} {typeLabel})
+            <span className="hidden sm:inline">Download all as ZIP ({total.toLocaleString()} {typeLabel})</span>
+            <span className="sm:hidden">Download all</span>
           </button>
         )}
       </div>

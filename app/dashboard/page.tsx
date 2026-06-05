@@ -17,25 +17,25 @@ export default async function DashboardPage() {
   const totalContent = await prisma.content.count()
 
   return (
-    <div className="max-w-[1160px] mx-auto px-8 py-8">
+    <div className="max-w-[1160px] mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
       {/* Hero */}
-      <div className="flex items-start justify-between gap-10 mb-7">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5 md:gap-10 mb-7">
         <div className="flex-1 min-w-0 pt-1">
-          <div className="flex items-center gap-2 mb-5">
+          <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
             <span className="text-[11px] font-mono font-semibold text-gray-500 tracking-widest uppercase">Lifetime Access · Unlimited Downloads</span>
           </div>
           <h1 className="leading-[1.1]">
-            <span className="text-[46px] font-bold text-gray-900">Welcome back, {firstName}.</span>
+            <span className="text-[28px] sm:text-[36px] md:text-[46px] font-bold text-gray-900">Welcome back, {firstName}.</span>
             <br />
-            <span className="text-[46px] font-light italic text-gray-300">Your library is ready.</span>
+            <span className="text-[28px] sm:text-[36px] md:text-[46px] font-light italic text-gray-300">Your library is ready.</span>
           </h1>
         </div>
         {/* Stats card */}
-        <div className="w-[300px] shrink-0 bg-[#0e0e0e] text-white rounded-2xl p-6">
+        <div className="w-full md:w-[300px] md:shrink-0 bg-[#0e0e0e] text-white rounded-2xl p-5 md:p-6">
           <div className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-1">Your Access</div>
-          <h2 className="text-[22px] font-bold mb-2">Full Library Unlocked</h2>
-          <p className="text-[13px] text-gray-400 mb-5 leading-relaxed">Search, preview, and download anything. No limits, no expiry.</p>
+          <h2 className="text-[20px] md:text-[22px] font-bold mb-2">Full Library Unlocked</h2>
+          <p className="text-[13px] text-gray-400 mb-4 leading-relaxed">Search, preview, and download anything. No limits, no expiry.</p>
           <Link href="/dashboard/library" className="text-[12px] text-white flex items-center gap-1.5 hover:text-gray-300 transition-colors">
             Browse library
             <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -47,27 +47,27 @@ export default async function DashboardPage() {
 
       {/* Stats row */}
       <div className="grid grid-cols-3 border border-gray-200 rounded-2xl overflow-hidden mb-6">
-        <div className="p-5 border-r border-gray-200">
-          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Total Content</div>
-          <div className="text-3xl font-bold text-gray-900 mb-1">{totalContent.toLocaleString()}+</div>
-          <div className="text-sm text-gray-400">videos, ebooks & more</div>
+        <div className="p-3 sm:p-5 border-r border-gray-200">
+          <div className="text-[9px] sm:text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">Total Content</div>
+          <div className="text-xl sm:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1">{totalContent.toLocaleString()}+</div>
+          <div className="text-[11px] sm:text-sm text-gray-400">videos, ebooks &amp; more</div>
         </div>
-        <div className="p-5 border-r border-gray-200">
-          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Saved</div>
-          <div className="text-3xl font-bold text-gray-900 mb-1">{user?.favorites.length ?? 0}</div>
-          <div className="text-sm text-gray-400">favorites pinned</div>
+        <div className="p-3 sm:p-5 border-r border-gray-200">
+          <div className="text-[9px] sm:text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">Saved</div>
+          <div className="text-xl sm:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1">{user?.favorites.length ?? 0}</div>
+          <div className="text-[11px] sm:text-sm text-gray-400">favorites pinned</div>
         </div>
-        <div className="p-5">
-          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Downloads</div>
-          <div className="text-3xl font-bold text-gray-900 mb-1">{user?.downloads.length ?? 0}</div>
-          <div className="text-sm text-gray-400">files downloaded</div>
+        <div className="p-3 sm:p-5">
+          <div className="text-[9px] sm:text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">Downloads</div>
+          <div className="text-xl sm:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1">{user?.downloads.length ?? 0}</div>
+          <div className="text-[11px] sm:text-sm text-gray-400">files downloaded</div>
         </div>
       </div>
 
       {/* Favorites + Recent Downloads */}
-      <div className="grid grid-cols-2 gap-5 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mb-6 md:mb-8">
         {/* Favorites */}
-        <div className="border border-gray-200 rounded-2xl p-5">
+        <div className="border border-gray-200 rounded-2xl p-4 md:p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
@@ -80,15 +80,15 @@ export default async function DashboardPage() {
                 <div className="text-[13.5px] font-semibold text-gray-900">Continue where you left off</div>
               </div>
             </div>
-            <Link href="/dashboard/favorites" className="text-[12px] text-gray-400 hover:text-gray-900 flex items-center gap-1 transition-colors">
-              Open favorites
+            <Link href="/dashboard/favorites" className="text-[12px] text-gray-400 hover:text-gray-900 flex items-center gap-1 transition-colors shrink-0 ml-2">
+              Open
               <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
             </Link>
           </div>
           {user?.favorites.length ? (
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2.5 flex-wrap">
               {user.favorites.map((f: typeof user.favorites[0]) => (
-                <div key={f.id} className="w-[115px] h-[145px] rounded-xl overflow-hidden bg-gray-800">
+                <div key={f.id} className="w-[100px] h-[130px] rounded-xl overflow-hidden bg-gray-800">
                   {f.content.thumbnailUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={f.content.thumbnailUrl} alt={f.content.title} className="w-full h-full object-cover opacity-80" />
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Downloads */}
-        <div className="border border-gray-200 rounded-2xl p-5">
+        <div className="border border-gray-200 rounded-2xl p-4 md:p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
@@ -118,22 +118,22 @@ export default async function DashboardPage() {
                 <div className="text-[13.5px] font-semibold text-gray-900">Last in your vault</div>
               </div>
             </div>
-            <Link href="/dashboard/downloads" className="text-[12px] text-gray-400 hover:text-gray-900 flex items-center gap-1 transition-colors">
-              Open downloads
+            <Link href="/dashboard/downloads" className="text-[12px] text-gray-400 hover:text-gray-900 flex items-center gap-1 transition-colors shrink-0 ml-2">
+              Open
               <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
             </Link>
           </div>
           {user?.downloads.length ? (
             <div className="divide-y divide-gray-100">
               {user.downloads.map((d: typeof user.downloads[0]) => (
-                <div key={d.id} className="py-2.5 flex items-center justify-between">
-                  <div>
-                    <div className="text-[13px] font-medium text-gray-900">{d.content.title}</div>
-                    <div className="text-[11px] text-gray-400 uppercase tracking-wide font-medium mt-0.5">
+                <div key={d.id} className="py-2.5 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-medium text-gray-900 truncate">{d.content.title}</div>
+                    <div className="text-[11px] text-gray-400 uppercase tracking-wide font-medium mt-0.5 truncate">
                       {d.content.type} · {d.content.niche}
                     </div>
                   </div>
-                  <span className="text-[11.5px] text-gray-400 shrink-0 ml-3">
+                  <span className="text-[11.5px] text-gray-400 shrink-0">
                     {new Date(d.createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -146,10 +146,10 @@ export default async function DashboardPage() {
       </div>
 
       {/* Browse CTA */}
-      <div className="border border-gray-200 rounded-2xl p-6 text-center">
+      <div className="border border-gray-200 rounded-2xl p-5 md:p-6 text-center">
         <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">New This Week</p>
-        <h2 className="text-[24px] font-bold text-black mb-2">Fresh assets just added</h2>
-        <p className="text-[15px] text-gray-500 mb-5">New videos and ebooks are added every week — all yours at no extra charge.</p>
+        <h2 className="text-[20px] md:text-[24px] font-bold text-black mb-2">Fresh assets just added</h2>
+        <p className="text-[14px] md:text-[15px] text-gray-500 mb-5">New videos and ebooks are added every week — all yours at no extra charge.</p>
         <Link href="/dashboard/library" className="inline-flex items-center gap-2 bg-black text-white font-semibold text-[14px] px-6 py-3 rounded-xl hover:bg-gray-900 transition-colors">
           Open library
           <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

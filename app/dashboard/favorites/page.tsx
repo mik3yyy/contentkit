@@ -10,12 +10,12 @@ export default async function FavoritesPage() {
   })
 
   return (
-    <div className="max-w-[1160px] mx-auto px-8 py-8">
-      <h1 className="text-[28px] font-bold text-black mb-1">Favorites</h1>
+    <div className="max-w-[1160px] mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-8">
+      <h1 className="text-[24px] md:text-[28px] font-bold text-black mb-1">Favorites</h1>
       <p className="text-[14px] text-gray-500 mb-8">{user?.favorites.length ?? 0} items saved</p>
 
       {!user?.favorites.length ? (
-        <div className="text-center py-24 border border-gray-200 rounded-2xl">
+        <div className="text-center py-20 border border-gray-200 rounded-2xl">
           <svg width="40" height="40" fill="none" stroke="#d1d5db" strokeWidth="1.5" viewBox="0 0 24 24" className="mx-auto mb-4">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
@@ -26,7 +26,7 @@ export default async function FavoritesPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
           {user.favorites.map((f: typeof user.favorites[0]) => (
             <div key={f.id} className="group cursor-pointer">
               <div className="relative rounded-xl overflow-hidden mb-2 bg-gray-900" style={{ aspectRatio: "3/4" }}>
@@ -42,7 +42,7 @@ export default async function FavoritesPage() {
                   <span className="text-[9px] font-bold text-white uppercase tracking-wide bg-black/60 rounded px-1.5 py-0.5 capitalize">{f.content.niche}</span>
                 </div>
               </div>
-              <p className="text-[12px] font-medium text-gray-800 truncate">{f.content.title}</p>
+              <p className="text-[11px] sm:text-[12px] font-medium text-gray-800 truncate">{f.content.title}</p>
             </div>
           ))}
         </div>
