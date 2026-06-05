@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
+import { track } from "@/lib/track"
 
 function SetupForm() {
   const router        = useRouter()
@@ -29,7 +30,10 @@ function SetupForm() {
     fetch(`/api/stripe/verify-payment?payment_intent=${piId}`)
       .then(r => r.json())
       .then(data => {
-        if (data.email) setEmail(data.email)
+        if (data.email) {
+          setEmail(data.email)
+          track("payment_success", { email: data.email })
+        }
         setVerifying(false)
       })
       .catch(() => setVerifying(false))
@@ -62,6 +66,7 @@ function SetupForm() {
     })
 
     if (signInRes?.url) {
+      track("signup_complete", { email })
       window.location.href = signInRes.url
     } else {
       setError("Account created. Please sign in.")

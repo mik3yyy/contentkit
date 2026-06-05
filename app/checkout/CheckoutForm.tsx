@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
+import { track } from "@/lib/track"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -67,6 +68,7 @@ function PaymentForm({ clientSecret }: { clientSecret: string }) {
     // Reached here = inline confirmation (wallet or card without 3DS).
     // Redirect manually so sign-up page gets the payment_intent param.
     if (paymentIntent?.status === "succeeded") {
+      track("payment_success", { email })
       window.location.href = `${returnUrl}&payment_intent=${paymentIntent.id}`
     } else {
       setError("Payment is still processing — please wait and try again.")
@@ -170,7 +172,10 @@ export default function CheckoutForm() {
   useEffect(() => {
     fetch("/api/stripe/create-payment-intent", { method: "POST" })
       .then(r => r.json())
-      .then(data => setClientSecret(data.clientSecret))
+      .then(data => {
+        setClientSecret(data.clientSecret)
+        track("checkout_start")
+      })
   }, [])
 
   if (!clientSecret) {

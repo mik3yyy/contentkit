@@ -64,3 +64,19 @@ model PasswordReset {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  vid       String   // persistent visitor ID (localStorage UUID — unique browser)
+  sid       String   // session ID (sessionStorage UUID — unique tab session)
+  event     String   // page_view | pricing_view | cta_click | checkout_start | payment_success | signup_complete | signin
+  page      String?  // URL pathname
+  ref       String?  // document.referrer
+  ua        String?  // user agent
+  meta      String?  // JSON string for extra data (email after payment, etc.)
+  createdAt DateTime @default(now())
+
+  @@index([event])
+  @@index([vid])
+  @@index([createdAt])
+}

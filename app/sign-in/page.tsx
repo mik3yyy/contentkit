@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
+import { track } from "@/lib/track"
 
 function SignInForm() {
   const router = useRouter()
@@ -50,6 +51,7 @@ function SignInForm() {
       setError("Incorrect password. Try again or reset it below.")
       setLoading(false)
     } else if (res?.url) {
+      track("signin", { email })
       window.location.href = res.url
     }
   }
