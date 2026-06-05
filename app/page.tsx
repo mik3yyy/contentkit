@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db"
+import { getDownloadUrl } from "@/lib/r2"
 import Navbar from "@/components/landing/Navbar"
 import Hero from "@/components/landing/Hero"
 import AsSeenOn from "@/components/landing/AsSeenOn"
@@ -16,24 +17,40 @@ import StickyBar from "@/components/landing/StickyBar"
 import FadeIn from "@/components/ui/FadeIn"
 import type { VideoItem } from "@/components/ui/VideoMarqueeStrip"
 
-export const revalidate = 3600
+// Revalidate every 50 min — keeps signed URLs (1 h TTL) from expiring between renders
+export const revalidate = 3000
 
-async function fetchNicheThumbnails(niches: string[], perNiche: number): Promise<Record<string, VideoItem[]>> {
+async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Record<string, VideoItem[]>> {
   try {
     const rows = await prisma.content.findMany({
-      where: { type: "video", niche: { in: niches }, thumbnailUrl: { not: null } },
-      select: { id: true, thumbnailUrl: true, niche: true },
+      where: { type: "video", niche: { in: niches } },
+      select: { id: true, r2Key: true, thumbnailUrl: true, niche: true },
       orderBy: { createdAt: "desc" },
       take: niches.length * perNiche,
     })
-    const map: Record<string, VideoItem[]> = {}
+
+    // Collect up to perNiche per niche first, then sign URLs in parallel
+    const byNiche: Record<string, typeof rows> = {}
     for (const row of rows) {
-      if (!map[row.niche]) map[row.niche] = []
-      if (map[row.niche].length < perNiche) {
-        map[row.niche].push({ id: row.id, thumbnailUrl: row.thumbnailUrl, niche: row.niche })
-      }
+      if (!byNiche[row.niche]) byNiche[row.niche] = []
+      if (byNiche[row.niche].length < perNiche) byNiche[row.niche].push(row)
     }
-    return map
+
+    const entries = await Promise.all(
+      Object.entries(byNiche).map(async ([niche, items]) => {
+        const signed = await Promise.all(
+          items.map(async item => ({
+            id:           item.id,
+            videoUrl:     await getDownloadUrl(item.r2Key),
+            thumbnailUrl: item.thumbnailUrl,
+            niche:        item.niche,
+          } satisfies VideoItem))
+        )
+        return [niche, signed] as const
+      })
+    )
+
+    return Object.fromEntries(entries)
   } catch {
     return {}
   }
@@ -44,8 +61,8 @@ export default async function LandingPage() {
   const NICHE_ROWS  = ["luxury", "fitness", "money-finance", "motivation"]
 
   const [heroRows, nicheRows] = await Promise.all([
-    fetchNicheThumbnails(HERO_NICHES, 3),
-    fetchNicheThumbnails(NICHE_ROWS, 10),
+    fetchNicheVideos(HERO_NICHES, 3),
+    fetchNicheVideos(NICHE_ROWS, 10),
   ])
 
   const heroItems: VideoItem[] = Object.values(heroRows).flat()
