@@ -20,45 +20,46 @@ interface Props {
 function VideoCard({ item, active, cardW, cardH }: {
   item: VideoItem; active: boolean; cardW: number; cardH: number
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef   = useRef<HTMLVideoElement>(null)
   const [playing, setPlaying] = useState(false)
+  // Once mounted, keep the video element in the DOM forever so buffered
+  // data is never thrown away. Flip from false→true on first activation,
+  // never back to false.
+  const everActive = useRef(false)
+  if (active) everActive.current = true
 
   useEffect(() => {
-    // When strip leaves viewport: reset so shimmer shows again on re-entry
-    if (!active) {
-      setPlaying(false)
-      return
-    }
-
     const v = videoRef.current
     if (!v) return
 
+    if (!active) {
+      // Just pause — keep element mounted so buffer is preserved
+      v.pause()
+      return
+    }
+
     const onPlaying = () => setPlaying(true)
-    // canplay fires when enough data is buffered — retry play() here for iOS
     const onCanPlay = () => { v.play().catch(() => {}) }
 
     v.addEventListener("playing", onPlaying)
     v.addEventListener("canplay", onCanPlay)
-
-    // First attempt — may succeed immediately or wait for canplay
     v.play().catch(() => {})
 
     return () => {
       v.removeEventListener("playing", onPlaying)
       v.removeEventListener("canplay", onCanPlay)
     }
-  }, [active]) // runs whenever active flips — NOT just on mount
+  }, [active])
 
   return (
     <div
       className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-900"
       style={{ width: cardW, height: cardH }}
     >
-      {/* Shimmer while video hasn't started — never shows a frozen frame or play icon */}
       {!playing && <div className="absolute inset-0 shimmer-dark" />}
 
-      {/* Video — opacity-0 until playing fires, then fades in */}
-      {active && item.videoUrl && (
+      {/* everActive: stay mounted once loaded — pause/resume instead of unmount/remount */}
+      {everActive.current && item.videoUrl && (
         <video
           ref={videoRef}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
