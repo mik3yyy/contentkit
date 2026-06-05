@@ -20,30 +20,12 @@ interface Props {
 function VideoCard({ item, active, cardW, cardH }: {
   item: VideoItem; active: boolean; cardW: number; cardH: number
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    const v = videoRef.current
-    if (!v || !active || !item.videoUrl) return
-    v.muted = true
-    const onMeta   = () => { v.currentTime = 0; v.play().catch(() => {}) }
-    const onLoaded = () => setReady(true)
-    v.addEventListener("loadedmetadata", onMeta)
-    v.addEventListener("canplay",        onLoaded)
-    if (v.readyState >= 2) { v.play().catch(() => {}); setReady(true) }
-    return () => {
-      v.removeEventListener("loadedmetadata", onMeta)
-      v.removeEventListener("canplay",        onLoaded)
-    }
-  }, [active, item.videoUrl])
-
   return (
     <div
       className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-900"
       style={{ width: cardW, height: cardH }}
     >
-      {/* Thumbnail — always visible as base/poster */}
+      {/* Thumbnail — permanent base so the card is never blank */}
       {item.thumbnailUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -53,20 +35,20 @@ function VideoCard({ item, active, cardW, cardH }: {
         />
       )}
 
-      {/* Video fades in when playing */}
+      {/* Video — mounted once the strip enters the viewport; browser handles autoplay */}
       {active && item.videoUrl && (
         <video
-          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
           src={item.videoUrl}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${ready ? "opacity-100" : "opacity-0"}`}
+          autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
         />
       )}
 
-      {/* Subtle gradient overlay for depth */}
+      {/* Subtle depth gradient */}
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
     </div>
   )
