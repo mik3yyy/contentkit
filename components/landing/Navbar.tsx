@@ -18,8 +18,8 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/sign-in" className="hidden sm:block text-[14px] text-gray-600 hover:text-black transition-colors">Sign in</Link>
-          <Link href="#pricing" className="flex items-center gap-1.5 bg-black text-white text-[13px] font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-900 transition-colors whitespace-nowrap">
+          <Link href="/sign-in" className="text-[14px] text-gray-600 hover:text-black transition-colors">Sign in</Link>
+          <Link href="#pricing" className="hidden md:flex items-center gap-1.5 bg-black text-white text-[13px] font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-900 transition-colors whitespace-nowrap">
             Get ContentKit
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
           </Link>

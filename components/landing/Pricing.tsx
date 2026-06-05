@@ -24,12 +24,12 @@ export default function Pricing() {
           </h2>
           <div className="flex items-center justify-center gap-6 text-[12px] font-semibold tracking-[0.12em] uppercase text-gray-400">
             <span className="flex items-center gap-1.5">
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
               Pay once
             </span>
             <span className="text-gray-300">·</span>
             <span className="flex items-center gap-1.5">
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
               Open the vault
             </span>
           </div>
@@ -44,7 +44,7 @@ export default function Pricing() {
             <div className="flex items-center gap-2 mb-7 flex-wrap">
               {[
                 { label: "Lifetime", green: true },
-                { label: "No refund on discounts", green: false },
+                { label: "Money-back guarantee", green: false },
                 { label: "Instant access", green: false },
               ].map(b => (
                 <span
@@ -69,15 +69,18 @@ export default function Pricing() {
             </p>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-3 gap-2 mb-8">
               {[
-                { n: "100K+", l: "HD & 4K clips" },
-                { n: "5,000+", l: "Rebrandable products" },
-                { n: "50+", l: "Niches" },
+                { n: "100K+", l: "HD & 4K clips",  lMobile: "Clips"    },
+                { n: "5,000+", l: "Rebrandable",    lMobile: "Products" },
+                { n: "50+",   l: "Niches",          lMobile: "Niches"   },
               ].map(s => (
-                <div key={s.l} className="bg-white/5 rounded-2xl p-4">
-                  <div className="text-[22px] font-black text-white">{s.n}</div>
-                  <div className="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide font-semibold">{s.l}</div>
+                <div key={s.l} className="bg-white/5 rounded-2xl p-2.5 sm:p-4">
+                  <div className="text-[16px] sm:text-[22px] font-black text-white leading-tight">{s.n}</div>
+                  <div className="text-[8px] sm:text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide font-semibold leading-tight">
+                    <span className="sm:hidden">{s.lMobile}</span>
+                    <span className="hidden sm:block">{s.l}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -86,7 +89,7 @@ export default function Pricing() {
             <ul className="space-y-3 flex-1">
               {FEATURES.map(f => (
                 <li key={f} className="flex items-start gap-2.5 text-[12.5px] text-gray-400 leading-relaxed">
-                  <svg className="shrink-0 mt-0.5" width="13" height="13" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg className="shrink-0 mt-0.5" width="13" height="13" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
                   {f}
                 </li>
               ))}
@@ -108,7 +111,7 @@ export default function Pricing() {
               <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-gray-400">Checkout</span>
               <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400">
                 <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
                 Encrypted
               </span>
