@@ -18,15 +18,7 @@ export default function RefundPolicy() {
             <p>ContentKit is a digital product. Because you receive instant, lifetime access to over 100,000 files upon purchase, we operate a limited refund policy as described below. Please read this policy carefully before completing your purchase.</p>
           </section>
 
-          <section className="bg-black text-white rounded-2xl p-6">
-            <h2 className="text-[18px] font-bold mb-3">⚠ Discounted Purchases Are Non-Refundable</h2>
-            <p className="text-gray-300 text-[14px] leading-relaxed">
-              If you purchase ContentKit at any price below the standard retail price of <strong className="text-white">$80</strong> — including any promotional discount, coupon, sale price, or limited-time offer — <strong className="text-white">your purchase is final and non-refundable</strong>. No exceptions will be made.
-            </p>
-            <p className="text-gray-300 text-[14px] leading-relaxed mt-3">
-              By completing a discounted purchase, you explicitly acknowledge and agree that you are not entitled to a refund under any circumstances, including but not limited to: change of mind, failure to use the product, or dissatisfaction after access has been granted.
-            </p>
-          </section>
+          <p className="font-bold text-black text-[16px]">Discounted purchases are non-refundable.</p>
 
           <section>
             <h2 className="text-[20px] font-bold text-black mb-3">Full-Price Purchases</h2>
