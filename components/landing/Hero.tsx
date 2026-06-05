@@ -37,10 +37,10 @@ export default function Hero({ items }: { items: VideoItem[] }) {
         </div>
 
         {/* Headline */}
-        <h1 className="font-black leading-[0.93] tracking-[-0.035em] text-black" style={{ fontSize: "clamp(52px,7vw,88px)" }}>
+        <h1 className="font-black leading-[0.93] tracking-[-0.035em] text-black" style={{ fontSize: "clamp(38px,7vw,88px)" }}>
           100,000+ videos<br />&amp; ebooks.
         </h1>
-        <p className="font-light italic leading-[1.0] tracking-[-0.035em] text-gray-300 mt-2 mb-12" style={{ fontSize: "clamp(52px,7vw,88px)" }}>
+        <p className="font-light italic leading-[1.0] tracking-[-0.035em] text-gray-300 mt-2 mb-12" style={{ fontSize: "clamp(38px,7vw,88px)" }}>
           One payment.
         </p>
 
@@ -53,7 +53,7 @@ export default function Hero({ items }: { items: VideoItem[] }) {
         </p>
 
         {/* CTAs */}
-        <div className="flex items-center justify-center gap-3 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
           <Link href="#pricing" className="flex items-center gap-2 bg-black text-white font-semibold text-[15px] px-8 py-4 rounded-2xl hover:bg-gray-900 transition-colors">
             Get ContentKit
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>

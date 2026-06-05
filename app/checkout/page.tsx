@@ -3,7 +3,7 @@ import CheckoutForm from "./CheckoutForm"
 export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#eeecea] flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-[1000px] grid grid-cols-2 gap-12 items-start">
+      <div className="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
         {/* Left: summary */}
         <div className="pt-4">
           <div className="flex items-center gap-2.5 mb-8">
@@ -17,7 +17,7 @@ export default function CheckoutPage() {
             <span className="font-bold text-[17px]">ContentKit</span>
           </div>
 
-          <h1 className="text-[36px] font-black tracking-tight text-black leading-tight mb-2">
+          <h1 className="text-[28px] sm:text-[36px] font-black tracking-tight text-black leading-tight mb-2">
             Get lifetime access.<br />Pay once.
           </h1>
           <p className="text-[16px] text-gray-500 mb-8">Everything unlocked forever. No recurring charges.</p>

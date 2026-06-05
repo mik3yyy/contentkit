@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#eeecea] py-16">
       <div className="max-w-[1100px] mx-auto px-6">
-        <div className="grid grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-12">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-1">
               <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
@@ -49,7 +49,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-200 pt-6 flex items-center justify-between text-[12px] text-gray-400">
+        <div className="border-t border-gray-200 pt-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 sm:justify-between text-[12px] text-gray-400">
           <span>A <span className="font-semibold text-gray-500">House of Michaels</span> product</span>
           <span>© 2026 ContentKit. All rights reserved.</span>
         </div>

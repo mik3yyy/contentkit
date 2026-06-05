@@ -124,8 +124,8 @@ export default function WhatsInside({
           <p className="text-[15px] text-gray-500 leading-relaxed mb-6 max-w-[500px]">Stream-ready 9:16 footage across 50+ niches — luxury, fitness, food, business, motivation, nature. Post-ready for TikTok, Reels, Shorts.</p>
 
           {clipItems.length > 0 && (
-            <div className="grid grid-cols-7 gap-2 mb-6">
-              {clipItems.slice(0, 7).map(item => (
+            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2 mb-6">
+              {clipItems.slice(0, Math.min(7, clipItems.length)).map(item => (
                 <div key={item.id} className="relative rounded-xl overflow-hidden bg-gray-900" style={{ height: 175 }}>
                   {item.thumbnailUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -171,7 +171,7 @@ export default function WhatsInside({
         </div>
 
         {/* Ebooks + Templates */}
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden">
             <div className="inline-flex items-center gap-2 border border-gray-200 rounded-full px-3 py-1 mb-5">
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">5,000+ Files · Bonus Included</span>

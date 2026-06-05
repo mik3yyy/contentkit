@@ -3,7 +3,7 @@ export default function ForCreatorsResellers() {
     <section className="bg-white border-t border-gray-100">
       <div className="max-w-[1100px] mx-auto px-6">
         {/* Row 1 */}
-        <div className="grid gap-16 items-start py-20 border-b border-gray-100" style={{ gridTemplateColumns: "260px 1fr" }}>
+        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8 md:gap-16 items-start py-14 md:py-20 border-b border-gray-100">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 border border-gray-200 rounded-xl flex items-center justify-center shrink-0">
               <svg width="17" height="17" fill="none" stroke="#374151" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -17,12 +17,12 @@ export default function ForCreatorsResellers() {
             </div>
           </div>
           <div>
-            <h2 className="text-[40px] font-bold leading-tight tracking-tight text-black mb-3">Never run out of content again.</h2>
+            <h2 className="text-[32px] md:text-[40px] font-bold leading-tight tracking-tight text-black mb-3">Never run out of content again.</h2>
             <p className="text-[16px] text-gray-500 leading-relaxed">Stay consistent without burnout. Plug-and-play HD videos and ebooks to grow your brand and save hours every week.</p>
           </div>
         </div>
         {/* Row 2 */}
-        <div className="grid gap-16 items-start py-20" style={{ gridTemplateColumns: "260px 1fr" }}>
+        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8 md:gap-16 items-start py-14 md:py-20">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 border border-gray-200 rounded-xl flex items-center justify-center shrink-0">
               <svg width="17" height="17" fill="none" stroke="#374151" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@ export default function ForCreatorsResellers() {
             </div>
           </div>
           <div>
-            <h2 className="text-[40px] font-bold leading-tight tracking-tight text-black mb-3">A complete resell pack worth thousands.</h2>
+            <h2 className="text-[32px] md:text-[40px] font-bold leading-tight tracking-tight text-black mb-3">A complete resell pack worth thousands.</h2>
             <p className="text-[16px] text-gray-500 leading-relaxed">Full resell rights — flip it, sell niche bundles, or package your own offers. Keep 100% of every sale.</p>
           </div>
         </div>

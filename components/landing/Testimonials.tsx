@@ -161,12 +161,12 @@ export default function Testimonials() {
       <div className="max-w-[1100px] mx-auto px-6">
 
         {/* Header */}
-        <div className="grid grid-cols-[1fr_360px] gap-12 items-start mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-8 md:gap-12 items-start mb-12 md:mb-20">
           <div>
             <div className="inline-flex items-center border border-gray-300 rounded-full px-4 py-1 mb-6">
               <span className="text-[10.5px] font-semibold text-gray-500 uppercase tracking-[0.15em]">Creator Reviews</span>
             </div>
-            <h2 className="text-[38px] leading-[1.1] tracking-tight">
+            <h2 className="text-[30px] md:text-[38px] leading-[1.1] tracking-tight">
               <span className="font-black text-black">Different creators,</span>
               <br />
               <span className="font-light italic text-gray-400">different use cases,</span>
@@ -174,7 +174,7 @@ export default function Testimonials() {
               <span className="font-light italic text-gray-400">same vault.</span>
             </h2>
           </div>
-          <div className="pt-14">
+          <div className="md:pt-14">
             <p className="text-[15px] text-gray-500 leading-relaxed">
               Faceless page owners, ad buyers, agency owners, and resellers all pull from the same vault. Same clips, different angles — theme pages, ads, client work, or clip packs of their own.
             </p>
@@ -182,14 +182,14 @@ export default function Testimonials() {
         </div>
 
         {/* Staggered 3-column grid — each card animates in on scroll */}
-        <div className="grid grid-cols-3 gap-5 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:items-start">
           <div className="flex flex-col gap-5">
             {col1.map((r, i) => <ReviewCard key={i} review={r} delay={i * 100} />)}
           </div>
-          <div className="flex flex-col gap-5 mt-12">
+          <div className="flex flex-col gap-5 md:mt-12">
             {col2.map((r, i) => <ReviewCard key={i} review={r} delay={i * 100 + 60} />)}
           </div>
-          <div className="flex flex-col gap-5 mt-6">
+          <div className="flex flex-col gap-5 md:mt-6">
             {col3.map((r, i) => <ReviewCard key={i} review={r} delay={i * 100 + 30} />)}
           </div>
         </div>

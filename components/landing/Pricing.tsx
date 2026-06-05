@@ -18,7 +18,7 @@ export default function Pricing() {
           <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-400 mb-5">
             Secure Checkout
           </p>
-          <h2 className="text-[52px] tracking-tight leading-tight mb-3">
+          <h2 className="text-[28px] sm:text-[38px] md:text-[52px] tracking-tight leading-tight mb-3">
             <span className="font-black text-black">One payment.</span>{" "}
             <span className="font-light italic text-gray-400">Open the ContentKit forever.</span>
           </h2>
@@ -36,7 +36,7 @@ export default function Pricing() {
         </div>
 
         {/* Card */}
-        <div className="grid grid-cols-[1fr_1.1fr] rounded-3xl overflow-hidden shadow-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] rounded-3xl overflow-hidden shadow-2xl">
 
           {/* Left — dark product info */}
           <div className="bg-[#111] p-10 flex flex-col">

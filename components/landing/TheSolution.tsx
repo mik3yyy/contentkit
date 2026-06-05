@@ -44,7 +44,7 @@ export default function TheSolution() {
   return (
     <section className="bg-white py-24 overflow-hidden">
       <div className="max-w-[1100px] mx-auto px-6">
-        <div className="grid grid-cols-2 gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           {/* Left */}
           <div className="pt-4">
             <div className="inline-flex items-center border border-gray-200 rounded-full px-4 py-1 mb-8">
@@ -74,8 +74,8 @@ export default function TheSolution() {
             </div>
           </div>
 
-          {/* Right: browser mockup */}
-          <div className="relative">
+          {/* Right: browser mockup — hidden on mobile (too small to be readable) */}
+          <div className="relative hidden lg:block">
             <div className="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden shadow-2xl">
               <div className="bg-gray-100 border-b border-gray-200 px-4 py-2.5 flex items-center gap-3">
                 <div className="flex gap-1.5">

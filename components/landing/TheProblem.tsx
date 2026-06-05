@@ -13,7 +13,7 @@ export default function TheProblem() {
         </p>
 
         {/* Mockup cards */}
-        <div className="grid grid-cols-3 gap-4 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
           {/* Timeline */}
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <div className="flex gap-1.5 mb-4">
@@ -72,7 +72,7 @@ export default function TheProblem() {
         </div>
 
         {/* Text columns */}
-        <div className="grid grid-cols-3 gap-12 border-t border-gray-200 pt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-12 border-t border-gray-200 pt-12">
           <div>
             <p className="text-[11px] font-semibold text-gray-400 tracking-wider mb-3">01</p>
             <h3 className="text-[19px] font-bold text-black mb-3">Filming takes hours.</h3>
