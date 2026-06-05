@@ -84,33 +84,36 @@ function AssetCard({
   item: ContentItem; selecting: boolean; selected: boolean
   onToggle: (id: string) => void; previewUrl: string | undefined
 }) {
-  const [dlLoading, setDlLoading]   = useState(false)
-  const [favorited, setFavorited]   = useState(false)
-  const [isHovered, setIsHovered]   = useState(false)
-  const videoRef                    = useRef<HTMLVideoElement>(null)
-  const title   = cleanTitle(item.title)
-  const isEbook = item.type === "ebook"
-  const tier    = item.tags[0]?.toUpperCase()
+  const [favorited, setFavorited] = useState(false)
+  const [frameReady, setFrameReady] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const title    = cleanTitle(item.title)
+  const isEbook  = item.type === "ebook"
+  const tier     = item.tags[0]?.toUpperCase()
+
+  // After metadata loads, seek to 1 s so the browser renders a real frame
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || !previewUrl || isEbook) return
+    const onMeta   = () => { v.currentTime = 1 }
+    const onSeeked = () => setFrameReady(true)
+    v.addEventListener("loadedmetadata", onMeta)
+    v.addEventListener("seeked",         onSeeked)
+    // Handle race: metadata may already be ready
+    if (v.readyState >= 1) v.currentTime = 1
+    return () => {
+      v.removeEventListener("loadedmetadata", onMeta)
+      v.removeEventListener("seeked",         onSeeked)
+    }
+  }, [previewUrl, isEbook])
 
   const handleMouseEnter = () => {
-    setIsHovered(true)
-    if (videoRef.current && previewUrl) {
-      videoRef.current.currentTime = 0
-      videoRef.current.play().catch(() => {})
-    }
+    if (videoRef.current && !isEbook) videoRef.current.play().catch(() => {})
   }
   const handleMouseLeave = () => {
-    setIsHovered(false)
-    if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0 }
+    if (videoRef.current) videoRef.current.pause()
   }
 
-  const stopAndDownload = async (e: React.MouseEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    if (selecting) return
-    setDlLoading(true)
-    try { const { url } = await fetch(`/api/content/${item.id}/download`).then(r => r.json()); if (url) window.open(url, "_blank") }
-    finally { setDlLoading(false) }
-  }
   const stopAndFavorite = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation()
     const { favorited: f } = await fetch(`/api/content/${item.id}/favorite`, { method: "POST" }).then(r => r.json())
@@ -119,95 +122,92 @@ function AssetCard({
 
   const thumbnail = (
     <div
-      className={`relative rounded-xl overflow-hidden mb-2 transition-all ${selected ? "ring-2 ring-black ring-offset-2" : ""}`}
+      className={`relative rounded-xl overflow-hidden mb-2 ${selected ? "ring-2 ring-black ring-offset-2" : ""}`}
       style={{ aspectRatio: isEbook ? "3/4" : "9/16" }}
     >
-      {/* Background layer: actual thumbnail or dark placeholder */}
+      {/* Static thumbnail or dark placeholder */}
       {item.thumbnailUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={item.thumbnailUrl} alt={title}
-          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]" />
+        <img src={item.thumbnailUrl} alt={title} className="w-full h-full object-cover" />
       ) : (
-        <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center gap-2">
-          {isEbook ? (
-            <svg width="22" height="22" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-            </svg>
-          ) : (
-            <svg width="22" height="22" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" viewBox="0 0 24 24">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
-          )}
-          <span className="text-[8px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.15)" }}>
-            {item.niche.replace(/-/g, " ")}
-          </span>
+        <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+          {isEbook
+            ? <svg width="24" height="24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            : <svg width="24" height="24" fill="rgba(255,255,255,0.18)" stroke="none" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
         </div>
       )}
 
-      {/* Video preview overlay — shows on hover when URL is available */}
+      {/* Video element — preloads metadata, seeks to 1 s for still frame, plays on hover */}
       {previewUrl && !isEbook && (
         <video
           ref={videoRef}
           src={previewUrl}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frameReady ? "opacity-100" : "opacity-0"}`}
+          preload="metadata"
           muted
-          loop
           playsInline
-          preload="none"
         />
       )}
 
-      {/* Select checkbox */}
+      {/* Selection checkbox */}
       {selecting && (
-        <div className={`absolute top-2 left-2 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all z-10 ${selected ? "bg-black border-black" : "bg-white/80 border-gray-400"}`}>
+        <div className={`absolute top-2 left-2 w-5 h-5 rounded-md border-2 flex items-center justify-center z-10 ${selected ? "bg-black border-black" : "bg-white/80 border-gray-400"}`}>
           {selected && <svg width="10" height="10" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
         </div>
       )}
 
-      {/* Non-select overlays */}
+      {/* Badges — visible in browse mode */}
       {!selecting && (
         <>
+          {/* Tier badge — top left */}
           {tier && (
             <div className="absolute top-2 left-2 z-10">
               <span className="text-[8px] font-black tracking-widest text-white bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5 uppercase">{tier}</span>
             </div>
           )}
+
+          {/* Heart — top right, shows on hover */}
           <button onClick={stopAndFavorite}
-            className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-all ${favorited ? "bg-red-500 opacity-100" : "bg-black/30 backdrop-blur-sm hover:bg-black/50"}`}>
+            className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity ${favorited ? "bg-red-500 !opacity-100" : "bg-black/30 backdrop-blur-sm hover:bg-black/50"}`}>
             <svg width="9" height="9" fill={favorited ? "white" : "none"} stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
-          {item.durationSeconds ? (
+
+          {/* Duration — bottom right */}
+          {item.durationSeconds && (
             <div className="absolute bottom-2 right-2 z-10">
               <span className="text-[9px] font-bold text-white bg-black/70 rounded px-1.5 py-0.5">{fmtDuration(item.durationSeconds)}</span>
             </div>
-          ) : isEbook ? (
+          )}
+
+          {/* Niche label — bottom left, EBOOKS ONLY */}
+          {isEbook && (
+            <div className="absolute bottom-2 left-2 z-10">
+              <span className="text-[9px] font-bold text-white uppercase tracking-wide bg-black/60 backdrop-blur-sm rounded px-1.5 py-0.5 capitalize">
+                {item.niche.replace(/-/g, " ")}
+              </span>
+            </div>
+          )}
+
+          {/* PDF badge — ebooks only */}
+          {isEbook && !tier && (
             <div className="absolute top-2 right-2 z-10">
               <span className="text-[9px] font-bold bg-red-500 text-white rounded px-1.5 py-0.5">PDF</span>
             </div>
-          ) : null}
-          <div className="absolute bottom-2 left-2 z-10">
-            <span className="text-[9px] font-bold text-white uppercase tracking-wide bg-black/60 backdrop-blur-sm rounded px-1.5 py-0.5 capitalize">
-              {item.niche.replace(/-/g, " ")}
-            </span>
-          </div>
-          <button onClick={stopAndDownload} disabled={dlLoading}
-            className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40">
-            <div className="bg-white text-black text-[12px] font-semibold px-4 py-2 rounded-xl shadow">
-              {dlLoading ? "..." : "↓ Download"}
-            </div>
-          </button>
+          )}
         </>
       )}
+      {/* ↑ No download overlay on hover */}
     </div>
   )
 
+  // Show title + duration below card for both types
   const meta = (
     <>
       <p className="text-[11px] font-medium text-gray-800 truncate">{title}</p>
-      {isEbook && item.tags.length > 1
-        ? <p className="text-[10px] text-gray-400 capitalize">{item.tags.slice(1, 3).join(" · ")}</p>
+      {isEbook
+        ? item.tags.length > 1 && <p className="text-[10px] text-gray-400 capitalize">{item.tags.slice(1, 3).join(" · ")}</p>
         : <p className="text-[10px] text-gray-400">{fmtDuration(item.durationSeconds) || fmtSize(item.fileSizeBytes)}</p>}
     </>
   )
@@ -218,8 +218,7 @@ function AssetCard({
 
   return (
     <Link href={`/dashboard/library/${item.id}`} className="group block"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
+      onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {thumbnail}
       {meta}
     </Link>
