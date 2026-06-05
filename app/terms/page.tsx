@@ -67,7 +67,7 @@ export default function Terms() {
 
           <section>
             <h2 className="text-[20px] font-bold text-black mb-3">9. Contact</h2>
-            <p>Questions? Email <a href="mailto:support@contentkit.com" className="underline text-black font-medium">support@contentkit.com</a>.</p>
+            <p>Questions? Email <a href="mailto:hello@houseofmichaels.com" className="underline text-black font-medium">hello@houseofmichaels.com</a>.</p>
           </section>
 
           <div className="border-t border-gray-200 pt-6 text-[12px] text-gray-400 flex gap-6">

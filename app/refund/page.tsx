@@ -25,7 +25,7 @@ export default function RefundPolicy() {
             <p>Customers who pay the full retail price of $80 may request a refund within <strong>7 days</strong> of purchase, provided:</p>
             <ul className="list-disc pl-5 mt-3 space-y-2">
               <li>The request is submitted within 7 calendar days of the purchase date.</li>
-              <li>You contact us at <a href="mailto:support@contentkit.com" className="underline text-black">support@contentkit.com</a> with your order details.</li>
+              <li>You contact us at <a href="mailto:hello@houseofmichaels.com" className="underline text-black">hello@houseofmichaels.com</a> with your order details.</li>
               <li>You have not downloaded more than 10% of the library content.</li>
             </ul>
             <p className="mt-4">Approved refunds are returned to the original payment method within 5–10 business days.</p>
@@ -49,7 +49,7 @@ export default function RefundPolicy() {
 
           <section>
             <h2 className="text-[20px] font-bold text-black mb-3">Contact</h2>
-            <p>For refund requests or questions, email us at <a href="mailto:support@contentkit.com" className="underline text-black font-medium">support@contentkit.com</a>. Include your order confirmation and the email used at purchase.</p>
+            <p>For refund requests or questions, email us at <a href="mailto:hello@houseofmichaels.com" className="underline text-black font-medium">hello@houseofmichaels.com</a>. Include your order confirmation and the email used at purchase.</p>
           </section>
 
           <div className="border-t border-gray-200 pt-6 text-[12px] text-gray-400 flex gap-6">

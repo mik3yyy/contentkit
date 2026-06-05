@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="text-[20px] font-bold text-black mb-3">1. Who We Are</h2>
-            <p>ContentKit is a product of House of Michaels. When this policy says &quot;we,&quot; &quot;us,&quot; or &quot;our,&quot; it refers to House of Michaels. Questions can be directed to <a href="mailto:support@contentkit.com" className="underline text-black">support@contentkit.com</a>.</p>
+            <p>ContentKit is a product of House of Michaels. When this policy says &quot;we,&quot; &quot;us,&quot; or &quot;our,&quot; it refers to House of Michaels. Questions can be directed to <a href="mailto:hello@houseofmichaels.com" className="underline text-black">hello@houseofmichaels.com</a>.</p>
           </section>
 
           <section>
@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
               <li>Request deletion of your data.</li>
               <li>Object to or restrict processing of your data.</li>
             </ul>
-            <p className="mt-4">To exercise any of these rights, email <a href="mailto:support@contentkit.com" className="underline text-black font-medium">support@contentkit.com</a>.</p>
+            <p className="mt-4">To exercise any of these rights, email <a href="mailto:hello@houseofmichaels.com" className="underline text-black font-medium">hello@houseofmichaels.com</a>.</p>
           </section>
 
           <section>
@@ -81,7 +81,7 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="text-[20px] font-bold text-black mb-3">9. Contact</h2>
-            <p>Privacy questions: <a href="mailto:support@contentkit.com" className="underline text-black font-medium">support@contentkit.com</a>.</p>
+            <p>Privacy questions: <a href="mailto:hello@houseofmichaels.com" className="underline text-black font-medium">hello@houseofmichaels.com</a>.</p>
           </section>
 
           <div className="border-t border-gray-200 pt-6 text-[12px] text-gray-400 flex gap-6">
