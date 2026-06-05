@@ -43,6 +43,17 @@ html {
   animation-play-state: paused;
 }
 
+@keyframes marquee-vert-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes marquee-vert-up {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+.marquee-vert-down { display: flex; flex-direction: column; animation: marquee-vert-down 22s linear infinite; }
+.marquee-vert-up   { display: flex; flex-direction: column; animation: marquee-vert-up   22s linear infinite; }
+
 @keyframes shimmer {
   0%   { background-position: -1000px 0; }
   100% { background-position:  1000px 0; }

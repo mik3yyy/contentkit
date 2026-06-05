@@ -17,7 +17,6 @@ import StickyBar from "@/components/landing/StickyBar"
 import FadeIn from "@/components/ui/FadeIn"
 import type { VideoItem } from "@/components/ui/VideoMarqueeStrip"
 
-// Revalidate every 50 min — keeps signed URLs (1 h TTL) from expiring between renders
 export const revalidate = 3000
 
 async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Record<string, VideoItem[]>> {
@@ -58,7 +57,10 @@ async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Rec
 async function fetchClipItems(count: number): Promise<ClipItem[]> {
   try {
     const rows = await prisma.content.findMany({
-      where: { type: "video" },
+      where: {
+        type: "video",
+        niche: { in: ["luxury", "fitness", "travel", "food", "motivation", "nature", "cars"] },
+      },
       select: { id: true, r2Key: true, thumbnailUrl: true },
       orderBy: { createdAt: "desc" },
       take: count,
@@ -90,14 +92,16 @@ async function fetchEbookItems(count: number): Promise<EbookItem[]> {
 }
 
 export default async function LandingPage() {
-  const HERO_NICHES = ["luxury", "fitness", "money-finance", "motivation", "food", "travel", "cars", "nature"]
-  const NICHE_ROWS  = ["luxury", "fitness", "money-finance", "motivation"]
+  // Hero: luxury + money-finance only for a premium first impression
+  const HERO_NICHES = ["luxury", "money-finance"]
+  // Niches section: all 8 rows
+  const NICHE_ROWS  = ["luxury", "fitness", "money-finance", "motivation", "gaming", "cars", "food", "travel"]
 
   const [heroRows, nicheRows, clipItems, ebookItems] = await Promise.all([
-    fetchNicheVideos(HERO_NICHES, 3),
+    fetchNicheVideos(HERO_NICHES, 10),
     fetchNicheVideos(NICHE_ROWS, 10),
     fetchClipItems(7),
-    fetchEbookItems(4),
+    fetchEbookItems(16),
   ])
 
   const heroItems: VideoItem[] = Object.values(heroRows).flat()

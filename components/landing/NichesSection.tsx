@@ -30,6 +30,10 @@ export default function NichesSection({ nicheItems }: { nicheItems: Record<strin
       <NicheRow title="Fitness"         count="12,200+ clips" items={nicheItems["fitness"]       ?? []} direction="reverse" />
       <NicheRow title="Money & Finance" count="7,600+ clips"  items={nicheItems["money-finance"] ?? []} direction="forward" />
       <NicheRow title="Motivation"      count="11,300+ clips" items={nicheItems["motivation"]    ?? []} direction="reverse" />
+      <NicheRow title="Gaming"          count="3,900+ clips"  items={nicheItems["gaming"]        ?? []} direction="forward" />
+      <NicheRow title="Cars"            count="4,800+ clips"  items={nicheItems["cars"]          ?? []} direction="reverse" />
+      <NicheRow title="Food"            count="6,100+ clips"  items={nicheItems["food"]          ?? []} direction="forward" />
+      <NicheRow title="Travel"          count="7,600+ clips"  items={nicheItems["travel"]        ?? []} direction="reverse" />
     </section>
   )
 }
