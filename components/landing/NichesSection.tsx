@@ -29,7 +29,12 @@ export default function NichesSection({ rows }: { rows: NicheRowData[] }) {
         <span className="font-light italic tracking-tight text-gray-400 ml-3" style={{ fontSize: "clamp(36px,5vw,58px)" }}>Ready to post.</span>
         <p className="text-[16px] text-gray-500 mt-3">Browse a taste of what&apos;s inside — <strong className="text-black font-semibold">50+ categories</strong>, all yours from day one.</p>
       </div>
-      {rows.map(({ key, ...rest }) => <NicheRow key={key} {...rest} />)}
+      {rows.map(({ key, ...rest }, index) => (
+        // On mobile show only the top 2 niche rows — keeps simultaneous video count low.
+        <div key={key} className={index >= 2 ? "hidden md:block" : ""}>
+          <NicheRow {...rest} />
+        </div>
+      ))}
     </section>
   )
 }

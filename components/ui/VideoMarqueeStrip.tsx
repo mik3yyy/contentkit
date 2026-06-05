@@ -20,12 +20,21 @@ interface Props {
 function VideoCard({ item, active, cardW, cardH }: {
   item: VideoItem; active: boolean; cardW: number; cardH: number
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    // iOS Safari ignores the autoplay attribute — must call play() programmatically.
+    // preload="metadata" ensures enough data is buffered for play() to succeed.
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {})
+    }
+  }, [])
+
   return (
     <div
       className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-900"
       style={{ width: cardW, height: cardH }}
     >
-      {/* Thumbnail — permanent base so the card is never blank */}
       {item.thumbnailUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -35,20 +44,19 @@ function VideoCard({ item, active, cardW, cardH }: {
         />
       )}
 
-      {/* Video — mounted once the strip enters the viewport; browser handles autoplay */}
       {active && item.videoUrl && (
         <video
+          ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
           src={item.videoUrl}
           autoPlay
           muted
           loop
           playsInline
-          preload="none"
+          preload="metadata"
         />
       )}
 
-      {/* Subtle depth gradient */}
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
     </div>
   )
@@ -68,7 +76,7 @@ export default function VideoMarqueeStrip({
     const el = wrapRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setActive(true) },
+      ([entry]) => { setActive(entry.isIntersecting) },
       { threshold: 0.1 }
     )
     observer.observe(el)
@@ -76,7 +84,10 @@ export default function VideoMarqueeStrip({
   }, [])
 
   const videoItems = items.filter(i => i.videoUrl)
-  const doubled = [...videoItems, ...videoItems]
+  // Cap at 8 per strip — 16 total when doubled — enough for any viewport.
+  // Keeps simultaneous decoder count low on mobile.
+  const capped = videoItems.slice(0, 8)
+  const doubled = [...capped, ...capped]
   const cls = direction === "reverse" ? "marquee-rev" : speed === "slow" ? "marquee-slow" : "marquee"
 
   return (

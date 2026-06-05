@@ -17,6 +17,23 @@ const TEMPLATES = ["Offer Page","Welcome Email","Hook List","Content Plan","Lead
 export type ClipItem  = { id: string; videoUrl: string; thumbnailUrl: string | null }
 export type EbookItem = { id: string; thumbnailUrl: string | null; title: string }
 
+// ── Autoplay video — calls play() after mount for iOS Safari compatibility ────
+
+function AutoplayVideo({ src, className }: { src: string; className?: string }) {
+  const ref = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    ref.current?.play().catch(() => {})
+  }, [])
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay muted loop playsInline preload="metadata"
+      className={className}
+    />
+  )
+}
+
 // ── Vertical ebook marquee ───────────────────────────────────────────────────
 
 function EbookColumn({ items, direction }: { items: EbookItem[]; direction: "down" | "up" }) {
@@ -29,7 +46,7 @@ function EbookColumn({ items, direction }: { items: EbookItem[]; direction: "dow
           <div
             key={`${item.id}-${i}`}
             className="shrink-0 rounded-xl overflow-hidden bg-gray-200"
-            style={{ aspectRatio: "3/4", minHeight: 120 }}
+            style={{ aspectRatio: "3/4", minHeight: 100 }}
           >
             {item.thumbnailUrl
               ? (
@@ -83,7 +100,7 @@ function EbookMarquee({ items }: { items: EbookItem[] }) {
       ref={wrapRef}
       className="flex gap-2.5 overflow-hidden rounded-2xl"
       style={{
-        height: 340,
+        height: 260,
         maskImage: "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
         opacity: active ? 1 : 0,
@@ -91,7 +108,10 @@ function EbookMarquee({ items }: { items: EbookItem[] }) {
       }}
     >
       {columns.map((col, i) => (
-        <EbookColumn key={i} items={col} direction={i % 2 === 0 ? "down" : "up"} />
+        // columns 2 & 3 hidden on mobile — 2-column layout keeps it readable on small screens
+        <div key={i} className={i >= 2 ? "hidden sm:contents" : "contents"}>
+          <EbookColumn items={col} direction={i % 2 === 0 ? "down" : "up"} />
+        </div>
       ))}
     </div>
   )
@@ -112,30 +132,31 @@ export default function WhatsInside({
         <div className="inline-flex items-center border border-gray-300 bg-white/50 rounded-full px-4 py-1 mb-6">
           <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.1em]">What&apos;s Inside ContentKit</span>
         </div>
-        <h2 className="font-black leading-[0.93] tracking-tight text-black" style={{ fontSize: "clamp(36px,5vw,62px)" }}>Videos are the main event.</h2>
-        <p className="font-light italic leading-[1.05] tracking-tight text-gray-300 mb-10" style={{ fontSize: "clamp(36px,5vw,62px)" }}>The ebooks come free on top.</p>
+        <h2 className="font-black leading-[0.93] tracking-tight text-black" style={{ fontSize: "clamp(30px,5vw,62px)" }}>Videos are the main event.</h2>
+        <p className="font-light italic leading-[1.05] tracking-tight text-gray-300 mb-10" style={{ fontSize: "clamp(30px,5vw,62px)" }}>The ebooks come free on top.</p>
 
         {/* Clips card */}
-        <div className="bg-white rounded-3xl p-8 mb-5 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-3xl p-6 md:p-8 mb-5 border border-gray-100 shadow-sm">
           <div className="inline-flex items-center gap-2 border border-gray-200 rounded-full px-3 py-1 mb-5">
             <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">100,000+ Clips · The Main Event</span>
           </div>
-          <h3 className="text-[30px] font-bold text-black mb-2">Faceless HD &amp; 4K clips</h3>
-          <p className="text-[15px] text-gray-500 leading-relaxed mb-6 max-w-[500px]">Stream-ready 9:16 footage across 50+ niches — luxury, fitness, food, business, motivation, nature. Post-ready for TikTok, Reels, Shorts.</p>
+          <h3 className="text-[24px] md:text-[30px] font-bold text-black mb-2">Faceless HD &amp; 4K clips</h3>
+          <p className="text-[14px] md:text-[15px] text-gray-500 leading-relaxed mb-6 max-w-[500px]">Stream-ready 9:16 footage across 50+ niches — luxury, fitness, food, business, motivation, nature. Post-ready for TikTok, Reels, Shorts.</p>
 
           {clipItems.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2 mb-6">
-              {clipItems.slice(0, Math.min(7, clipItems.length)).map(item => (
-                <div key={item.id} className="relative rounded-xl overflow-hidden bg-gray-900" style={{ height: 175 }}>
+            <div className="grid grid-cols-3 md:grid-cols-7 gap-2 mb-6">
+              {clipItems.slice(0, Math.min(7, clipItems.length)).map((item, idx) => (
+                // On mobile only 3 clips play — fewer simultaneous decoders = smoother playback
+                <div
+                  key={item.id}
+                  className={`relative rounded-xl overflow-hidden bg-gray-900 ${idx >= 3 ? "hidden md:block" : ""}`}
+                  style={{ height: 175 }}
+                >
                   {item.thumbnailUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
                   )}
-                  <video
-                    src={item.videoUrl}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    autoPlay muted loop playsInline preload="none"
-                  />
+                  <AutoplayVideo src={item.videoUrl} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               ))}
             </div>
@@ -156,7 +177,6 @@ export default function WhatsInside({
               </span>
             ))}
           </div>
-          {/* Smaller extra niches */}
           <div className="flex flex-wrap gap-1.5 mb-3">
             {NICHES_SMALL.map(n => (
               <span key={n} className="border border-gray-100 bg-gray-50 rounded-md px-2 py-1 text-[10px] font-medium text-gray-400">
@@ -172,24 +192,24 @@ export default function WhatsInside({
 
         {/* Ebooks + Templates */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm overflow-hidden">
             <div className="inline-flex items-center gap-2 border border-gray-200 rounded-full px-3 py-1 mb-5">
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">5,000+ Files · Bonus Included</span>
             </div>
-            <h3 className="text-[26px] font-bold text-black mb-3">Ebooks &amp; guides</h3>
+            <h3 className="text-[22px] md:text-[26px] font-bold text-black mb-3">Ebooks &amp; guides</h3>
             <p className="text-[14px] text-gray-500 leading-relaxed mb-6">Rebrandable PDFs you can rename and resell as your own — or give away as a freebie. Self-help, finance, wellness, productivity.</p>
             <EbookMarquee items={ebookItems} />
           </div>
 
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
             <div className="inline-flex items-center gap-2 border border-gray-200 rounded-full px-3 py-1 mb-5">
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Plug-and-Play · Bonus Included</span>
             </div>
-            <h3 className="text-[26px] font-bold text-black mb-3">Templates, presets &amp; sounds</h3>
+            <h3 className="text-[22px] md:text-[26px] font-bold text-black mb-3">Templates, presets &amp; sounds</h3>
             <p className="text-[14px] text-gray-500 leading-relaxed mb-6">Lead magnets, hook lists, IG carousels, content calendars, offer pages, email templates, sound packs.</p>
             <div className="grid grid-cols-2 gap-2">
               {TEMPLATES.map(t => (
-                <div key={t} className="border border-gray-200 rounded-xl px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{t}</div>
+                <div key={t} className="border border-gray-200 rounded-xl px-3 md:px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{t}</div>
               ))}
             </div>
           </div>
