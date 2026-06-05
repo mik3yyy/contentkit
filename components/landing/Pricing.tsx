@@ -10,7 +10,7 @@ const FEATURES = [
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="bg-[#eeecea] py-24 min-h-screen flex flex-col justify-center">
+    <section id="pricing" className="bg-[#eeecea] py-12 md:py-24 min-h-screen flex flex-col justify-center">
       <div className="max-w-[1040px] mx-auto px-6 w-full">
 
         {/* Header */}
@@ -38,8 +38,8 @@ export default function Pricing() {
         {/* Card */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] rounded-3xl overflow-hidden shadow-2xl">
 
-          {/* Left — dark product info */}
-          <div className="bg-[#111] p-10 flex flex-col">
+          {/* Left — dark product info (shows second on mobile so checkout is immediately visible) */}
+          <div className="bg-[#111] p-10 flex flex-col order-2 md:order-1">
             {/* Badges */}
             <div className="flex items-center gap-2 mb-7 flex-wrap">
               {[
@@ -105,8 +105,8 @@ export default function Pricing() {
             </div>
           </div>
 
-          {/* Right — checkout form */}
-          <div className="bg-white p-10 flex flex-col justify-center">
+          {/* Right — checkout form (shows first on mobile) */}
+          <div className="bg-white p-10 flex flex-col justify-center order-1 md:order-2">
             <div className="flex items-center justify-between mb-6">
               <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-gray-400">Checkout</span>
               <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400">
