@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import LibraryClient from "./LibraryClient"
 
@@ -7,20 +8,29 @@ export default async function LibraryPage({
   searchParams: Promise<{ niche?: string; type?: string; tag?: string; q?: string; page?: string }>
 }) {
   const { niche, type, tag, q, page: pageParam } = await searchParams
+
+  // No "All" — default to Clips
+  if (!type) {
+    const p = new URLSearchParams()
+    if (niche) p.set("niche", niche)
+    if (tag)   p.set("tag",   tag)
+    if (q)     p.set("q",     q)
+    p.set("type", "video")
+    redirect(`/dashboard/library?${p}`)
+  }
+
   const page = Math.max(1, Number(pageParam ?? 1))
   const take = 40
   const skip = (page - 1) * take
 
-  // Dynamic niches from DB
   const nicheRows = await prisma.content.findMany({
-    where: type && type !== "all" ? { type } : {},
+    where: { type },
     select: { niche: true },
     distinct: ["niche"],
     orderBy: { niche: "asc" },
   })
   const niches = nicheRows.map(r => r.niche)
 
-  // Tags for ebooks
   const ebookTagRows = await prisma.content.findMany({
     where: { type: "ebook" },
     select: { tags: true },
@@ -29,10 +39,10 @@ export default async function LibraryPage({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {
-    ...(niche && niche !== "all" ? { niche }                       : {}),
-    ...(type  && type  !== "all" ? { type  }                       : {}),
-    ...(tag                      ? { tags: { has: tag } }          : {}),
-    ...(q                        ? { title: { contains: q, mode: "insensitive" } } : {}),
+    type,
+    ...(niche ? { niche }                                        : {}),
+    ...(tag   ? { tags: { has: tag } }                          : {}),
+    ...(q     ? { title: { contains: q, mode: "insensitive" } } : {}),
   }
 
   const [items, total] = await Promise.all([

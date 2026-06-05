@@ -59,9 +59,9 @@ function SidebarInner() {
         {/* Library section */}
         <span className="block text-[10px] font-semibold text-gray-400 uppercase tracking-[0.08em] px-2 mt-5 mb-1.5">Library</span>
 
-        {/* Library parent link */}
-        <Link href="/dashboard/library"
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] mb-0.5 transition-colors ${onLibrary && !activeType ? "bg-black text-white font-medium" : "text-gray-700 hover:bg-gray-50"}`}>
+        {/* Library parent link — defaults to Clips */}
+        <Link href="/dashboard/library?type=video"
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] mb-0.5 transition-colors ${onLibrary ? "bg-black text-white font-medium" : "text-gray-700 hover:bg-gray-50"}`}>
           <Icon name="library" />Library
         </Link>
 
