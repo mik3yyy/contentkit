@@ -44,7 +44,7 @@ export default function Pricing() {
             <div className="flex items-center gap-2 mb-7 flex-wrap">
               {[
                 { label: "Lifetime", green: true },
-                { label: "7-day refund", green: false },
+                { label: "No refund on discounts", green: false },
                 { label: "Instant access", green: false },
               ].map(b => (
                 <span
@@ -94,10 +94,10 @@ export default function Pricing() {
 
             {/* Price */}
             <div className="mt-8 pt-6 border-t border-white/10 flex items-baseline gap-3">
-              <span className="text-[48px] font-black text-white leading-none">$97</span>
+              <span className="text-[48px] font-black text-white leading-none">$12</span>
               <div>
-                <div className="text-gray-600 text-[13px] line-through">$297</div>
-                <div className="text-green-400 text-[11px] font-bold uppercase tracking-wider">67% off</div>
+                <div className="text-gray-600 text-[13px] line-through">$80</div>
+                <div className="text-green-400 text-[11px] font-bold uppercase tracking-wider">85% off</div>
               </div>
             </div>
           </div>

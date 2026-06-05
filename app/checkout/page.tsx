@@ -38,10 +38,10 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-[48px] font-black text-black">$97</span>
-            <span className="text-[16px] text-gray-400 line-through">$297</span>
+            <span className="text-[48px] font-black text-black">$12</span>
+            <span className="text-[16px] text-gray-400 line-through">$80</span>
           </div>
-          <p className="text-[13px] text-gray-500">One-time payment · 30-day money-back guarantee</p>
+          <p className="text-[13px] text-gray-500">One-time payment · 85% discount applied</p>
         </div>
 
         {/* Right: payment form */}

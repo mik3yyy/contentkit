@@ -63,9 +63,14 @@ function PaymentForm() {
         <span>Secure · 256-bit</span>
         <span>·</span>
         <span>Encrypted payments</span>
-        <span>·</span>
-        <span>30-day refund</span>
       </div>
+      <p className="text-center text-[10px] text-gray-400 mt-3 leading-relaxed">
+        By completing your purchase you agree to our{" "}
+        <a href="/terms"  className="underline hover:text-black transition-colors">Terms</a>,{" "}
+        <a href="/privacy" className="underline hover:text-black transition-colors">Privacy Policy</a>, and{" "}
+        <a href="/refund"  className="underline hover:text-black transition-colors">Refund Policy</a>.
+        Discounted purchases are non-refundable.
+      </p>
     </form>
   )
 }

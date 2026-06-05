@@ -11,4 +11,4 @@ export function getStripe(): Stripe {
   return _stripe
 }
 
-export const PRICE_CENTS = 9700 // $97.00
+export const PRICE_CENTS = 1200 // $12.00 (discounted from $80)
