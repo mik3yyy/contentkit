@@ -10,10 +10,15 @@ const r2 = new S3Client({
   },
 })
 
-export async function getDownloadUrl(key: string): Promise<string> {
+export async function getDownloadUrl(key: string, filename?: string): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME!,
     Key: key,
+    // Embed Content-Disposition in the signed URL so browsers download (not open) the file.
+    // This also eliminates CORS for link-click downloads (navigation ≠ fetch).
+    ...(filename
+      ? { ResponseContentDisposition: `attachment; filename="${encodeURIComponent(filename)}"` }
+      : {}),
   })
   return getSignedUrl(r2, command, { expiresIn: 3600 })
 }

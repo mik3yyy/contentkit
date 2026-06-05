@@ -17,12 +17,16 @@ export async function POST(req: NextRequest) {
   })
 
   const urls = await Promise.all(
-    items.map(async item => ({
-      id:    item.id,
-      title: item.title,
-      type:  item.type,
-      url:   await getDownloadUrl(item.r2Key),
-    }))
+    items.map(async item => {
+      const name = item.title.replace(/#\S+/g, "").replace(/[^a-zA-Z0-9 \-_]/g, "").trim()
+      const filename = name + (item.type === "ebook" ? ".pdf" : ".mp4")
+      return {
+        id:    item.id,
+        title: item.title,
+        type:  item.type,
+        url:   await getDownloadUrl(item.r2Key, filename),
+      }
+    })
   )
 
   // Log downloads

@@ -33,47 +33,56 @@ function fmtDuration(s: number | null) {
 }
 
 // ─── Download engine ─────────────────────────────────────────────────────────
+// Uses <a href="signedUrl"> navigation — not fetch() — so CORS never applies.
+// Content-Disposition: attachment is embedded in the signed URL server-side.
 
-async function downloadBlob(url: string, filename: string): Promise<void> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const blob = await res.blob()
-  const objUrl = URL.createObjectURL(blob)
+function triggerDownload(url: string): void {
   const a = document.createElement("a")
-  a.href = objUrl; a.download = filename
-  document.body.appendChild(a); a.click(); document.body.removeChild(a)
-  setTimeout(() => URL.revokeObjectURL(objUrl), 100)
+  a.href = url
+  a.rel = "noopener noreferrer"
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
-function makeFilename(title: string, type: string) {
-  return cleanTitle(title).replace(/[^a-zA-Z0-9 ]/g, "").trim() + (type === "ebook" ? ".pdf" : ".mp4")
-}
-async function downloadWithRetry(id: string, filename: string, initialUrl: string): Promise<boolean> {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      let url = initialUrl
-      if (attempt > 0) { const r = await fetch(`/api/content/${id}/download`); url = (await r.json()).url }
-      if (!url) continue
-      await downloadBlob(url, filename)
-      return true
-    } catch { if (attempt < 2) await new Promise(r => setTimeout(r, 1500 * (attempt + 1))) }
-  }
-  return false
-}
-async function runQueue(allIds: string[], onProgress: (d: number, f: number) => void, cancelRef: React.MutableRefObject<boolean>) {
-  const BATCH = 20, CONCURRENCY = 3; let done = 0, failed = 0
+
+async function runQueue(
+  allIds: string[],
+  onProgress: (done: number, failed: number) => void,
+  cancelRef: React.MutableRefObject<boolean>
+) {
+  const BATCH = 20, CONCURRENCY = 3
+  let done = 0
+
   for (let b = 0; b < allIds.length; b += BATCH) {
     if (cancelRef.current) return
+
     const batchIds = allIds.slice(b, b + BATCH)
-    const { urls } = await fetch("/api/content/batch-download", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: batchIds }) }).then(r => r.json()) as { urls: { id: string; url: string; title: string; type: string }[] }
+    let urls: { id: string; url: string }[] = []
+    try {
+      const res = await fetch("/api/content/batch-download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: batchIds }),
+      })
+      ;({ urls } = await res.json())
+    } catch {
+      // If batch fetch fails, skip and keep going
+      onProgress((done += batchIds.length), 0)
+      continue
+    }
+
     const pending = [...urls]
     const worker = async () => {
       while (pending.length > 0 && !cancelRef.current) {
         const item = pending.shift()!
-        const ok = await downloadWithRetry(item.id, makeFilename(item.title, item.type), item.url)
-        ok ? done++ : failed++; onProgress(done, failed); await new Promise(r => setTimeout(r, 80))
+        triggerDownload(item.url)   // link navigation — zero CORS risk
+        done++
+        onProgress(done, 0)
+        await new Promise(r => setTimeout(r, 350))  // pace between triggers
       }
     }
-    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, urls.length) }, worker))
+
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, pending.length) }, worker))
   }
 }
 

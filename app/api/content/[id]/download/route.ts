@@ -30,6 +30,8 @@ export async function GET(
     data: { userId: user.id, contentId: content.id },
   })
 
-  const url = await getDownloadUrl(content.r2Key)
+  const name = content.title.replace(/#\S+/g, "").replace(/[^a-zA-Z0-9 \-_]/g, "").trim()
+  const filename = name + (content.type === "ebook" ? ".pdf" : ".mp4")
+  const url = await getDownloadUrl(content.r2Key, filename)
   return Response.json({ url })
 }
