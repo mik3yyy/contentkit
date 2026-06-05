@@ -1,13 +1,3 @@
-const CLIP_IMAGES = [
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=180&h=280&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=180&h=280&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=180&h=280&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=180&h=280&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=180&h=280&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=180&h=280&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=180&h=280&fit=crop&q=75",
-]
-
 const NICHES_TOP = [
   ["Luxury","12,400+"],["Fitness","9,800+"],["Money","8,200+"],["Travel","7,600+"],["Motivation","6,900+"],["Food","6,100+"],
 ]
@@ -15,16 +5,18 @@ const NICHES_BOT = [
   ["Gaming","5,400+"],["Nature","5,200+"],["Cars","4,800+"],["Business","4,600+"],["Calisthenics","3,900+"],["Animals","3,700+"],
 ]
 
-const EBOOKS = [
-  { label: "Interview Success Blueprint", color: "text-orange-400", bg: "from-[#1a1a2e] to-[#16213e]" },
-  { label: "Email Nurture Strategy That Works", color: "text-green-400", bg: "from-[#0f0f1a] to-[#1a2a1a]" },
-  { label: "Build A Brand That Sells", color: "text-yellow-400", bg: "from-[#0a0a14] to-[#1a1a0a]" },
-  { label: "The Power of Mindful Mornings", color: "text-purple-400", bg: "from-[#12081a] to-[#1a0a2a]" },
-]
-
 const TEMPLATES = ["Offer Page","Welcome Email","Hook List","Content Plan","Lead Magnet","Sound Pack"]
 
-export default function WhatsInside() {
+export type ClipItem  = { id: string; videoUrl: string; thumbnailUrl: string | null }
+export type EbookItem = { id: string; thumbnailUrl: string | null; title: string }
+
+export default function WhatsInside({
+  clipItems,
+  ebookItems,
+}: {
+  clipItems:  ClipItem[]
+  ebookItems: EbookItem[]
+}) {
   return (
     <section id="whats-inside" className="bg-[#eeecea] py-12">
       <div className="max-w-[1160px] mx-auto px-6">
@@ -41,12 +33,30 @@ export default function WhatsInside() {
           </div>
           <h3 className="text-[30px] font-bold text-black mb-2">Faceless HD &amp; 4K clips</h3>
           <p className="text-[15px] text-gray-500 leading-relaxed mb-6 max-w-[500px]">Stream-ready 9:16 footage across 50+ niches — luxury, fitness, food, business, motivation, nature. Post-ready for TikTok, Reels, Shorts.</p>
-          <div className="grid grid-cols-7 gap-2 mb-6">
-            {CLIP_IMAGES.map((src, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={src} alt="" className="rounded-xl object-cover w-full" style={{ height: 175 }} />
-            ))}
-          </div>
+
+          {/* Autoplay clip grid */}
+          {clipItems.length > 0 && (
+            <div className="grid grid-cols-7 gap-2 mb-6">
+              {clipItems.slice(0, 7).map(item => (
+                <div key={item.id} className="relative rounded-xl overflow-hidden bg-gray-900" style={{ height: 175 }}>
+                  {item.thumbnailUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  )}
+                  <video
+                    src={item.videoUrl}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="none"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Top Niches by Clip Count</p>
           <div className="flex flex-wrap gap-2 mb-2">
             {NICHES_TOP.map(([n, c]) => (
@@ -73,13 +83,31 @@ export default function WhatsInside() {
             </div>
             <h3 className="text-[26px] font-bold text-black mb-3">Ebooks &amp; guides</h3>
             <p className="text-[14px] text-gray-500 leading-relaxed mb-6">Rebrandable PDFs you can rename and resell as your own — or give away as a freebie. Self-help, finance, wellness, productivity.</p>
+            {/* Cover previews — no links, no downloads */}
             <div className="flex gap-3">
-              {EBOOKS.map(({ label, color, bg }) => (
-                <div key={label} className={`w-[86px] h-[112px] rounded-xl bg-gradient-to-br ${bg} flex flex-col items-center justify-center p-2.5 shrink-0`}>
-                  <div className={`text-[7.5px] font-bold ${color} text-center uppercase leading-tight`}>{label}</div>
-                  <div className={`mt-2 w-5 h-5 rounded-full border border-current/30 flex items-center justify-center`}>
-                    <svg width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" className={color}><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
+              {ebookItems.slice(0, 4).map(item => (
+                <div
+                  key={item.id}
+                  className="w-[86px] h-[112px] rounded-xl overflow-hidden shrink-0 bg-gray-100"
+                >
+                  {item.thumbnailUrl
+                    ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.thumbnailUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                      />
+                    )
+                    : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg width="24" height="24" fill="none" stroke="#9ca3af" strokeWidth="1.5" viewBox="0 0 24 24">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                      </div>
+                    )
+                  }
                 </div>
               ))}
             </div>

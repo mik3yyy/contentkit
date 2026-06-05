@@ -75,7 +75,8 @@ export default function VideoMarqueeStrip({
     return () => observer.disconnect()
   }, [])
 
-  const doubled = [...items, ...items]
+  const videoItems = items.filter(i => i.videoUrl)
+  const doubled = [...videoItems, ...videoItems]
   const cls = direction === "reverse" ? "marquee-rev" : speed === "slow" ? "marquee-slow" : "marquee"
 
   return (

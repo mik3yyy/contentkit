@@ -6,7 +6,7 @@ import AsSeenOn from "@/components/landing/AsSeenOn"
 import ForCreatorsResellers from "@/components/landing/ForCreatorsResellers"
 import TheProblem from "@/components/landing/TheProblem"
 import TheSolution from "@/components/landing/TheSolution"
-import WhatsInside from "@/components/landing/WhatsInside"
+import WhatsInside, { type ClipItem, type EbookItem } from "@/components/landing/WhatsInside"
 import NichesSection from "@/components/landing/NichesSection"
 import Testimonials from "@/components/landing/Testimonials"
 import Pricing from "@/components/landing/Pricing"
@@ -29,7 +29,6 @@ async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Rec
       take: niches.length * perNiche,
     })
 
-    // Collect up to perNiche per niche first, then sign URLs in parallel
     const byNiche: Record<string, typeof rows> = {}
     for (const row of rows) {
       if (!byNiche[row.niche]) byNiche[row.niche] = []
@@ -56,13 +55,49 @@ async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Rec
   }
 }
 
+async function fetchClipItems(count: number): Promise<ClipItem[]> {
+  try {
+    const rows = await prisma.content.findMany({
+      where: { type: "video" },
+      select: { id: true, r2Key: true, thumbnailUrl: true },
+      orderBy: { createdAt: "desc" },
+      take: count,
+    })
+    return await Promise.all(
+      rows.map(async row => ({
+        id:           row.id,
+        videoUrl:     await getDownloadUrl(row.r2Key),
+        thumbnailUrl: row.thumbnailUrl,
+      }))
+    )
+  } catch {
+    return []
+  }
+}
+
+async function fetchEbookItems(count: number): Promise<EbookItem[]> {
+  try {
+    const rows = await prisma.content.findMany({
+      where: { type: "ebook", thumbnailUrl: { not: null } },
+      select: { id: true, thumbnailUrl: true, title: true },
+      orderBy: { createdAt: "desc" },
+      take: count,
+    })
+    return rows.map(row => ({ id: row.id, thumbnailUrl: row.thumbnailUrl, title: row.title }))
+  } catch {
+    return []
+  }
+}
+
 export default async function LandingPage() {
   const HERO_NICHES = ["luxury", "fitness", "money-finance", "motivation", "food", "travel", "cars", "nature"]
   const NICHE_ROWS  = ["luxury", "fitness", "money-finance", "motivation"]
 
-  const [heroRows, nicheRows] = await Promise.all([
+  const [heroRows, nicheRows, clipItems, ebookItems] = await Promise.all([
     fetchNicheVideos(HERO_NICHES, 3),
     fetchNicheVideos(NICHE_ROWS, 10),
+    fetchClipItems(7),
+    fetchEbookItems(4),
   ])
 
   const heroItems: VideoItem[] = Object.values(heroRows).flat()
@@ -75,7 +110,7 @@ export default async function LandingPage() {
       <FadeIn><ForCreatorsResellers /></FadeIn>
       <FadeIn><TheProblem /></FadeIn>
       <FadeIn><TheSolution /></FadeIn>
-      <FadeIn><WhatsInside /></FadeIn>
+      <FadeIn><WhatsInside clipItems={clipItems} ebookItems={ebookItems} /></FadeIn>
       <FadeIn><NichesSection nicheItems={nicheRows} /></FadeIn>
       <FadeIn><Testimonials /></FadeIn>
       <FadeIn><Pricing /></FadeIn>
