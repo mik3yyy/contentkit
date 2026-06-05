@@ -87,14 +87,17 @@ function AssetCard({
 }) {
   const [favorited, setFavorited]   = useState(false)
   const [frameReady, setFrameReady] = useState(false)
+  const [isMuted, setIsMuted]       = useState(true)   // user's mute preference
   const videoRef = useRef<HTMLVideoElement>(null)
   const title    = cleanTitle(item.title)
   const isEbook  = item.type === "ebook"
   const tier     = item.tags[0]?.toUpperCase()
 
+  // Seek to 1 s after metadata loads → shows real frame as static thumbnail
   useEffect(() => {
     const v = videoRef.current
     if (!v || !previewUrl || isEbook) return
+    v.muted = true
     const onMeta   = () => { v.currentTime = 1 }
     const onSeeked = () => setFrameReady(true)
     v.addEventListener("loadedmetadata", onMeta)
@@ -106,8 +109,29 @@ function AssetCard({
     }
   }, [previewUrl, isEbook])
 
-  const handleMouseEnter = () => { if (videoRef.current && !isEbook) videoRef.current.play().catch(() => {}) }
-  const handleMouseLeave = () => { if (videoRef.current) videoRef.current.pause() }
+  const handleMouseEnter = async () => {
+    const v = videoRef.current
+    if (!v || isEbook) return
+    v.muted = isMuted
+    try {
+      await v.play()
+      if (!isMuted) v.muted = false  // restore user preference after play succeeds
+    } catch {
+      v.muted = true
+      v.play().catch(() => {})
+    }
+  }
+  const handleMouseLeave = () => {
+    if (videoRef.current) videoRef.current.pause()
+    // preserve isMuted preference for next hover
+  }
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation()
+    const next = !isMuted
+    setIsMuted(next)
+    if (videoRef.current) videoRef.current.muted = next
+  }
 
   const stopAndFavorite = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation()
@@ -117,55 +141,92 @@ function AssetCard({
 
   const thumbnail = (
     <div
-      className={`relative rounded-xl overflow-hidden mb-2 ${selected ? "ring-2 ring-black ring-offset-2" : ""}`}
+      className={`relative rounded-xl overflow-hidden mb-2 bg-gray-100 ${selected ? "ring-2 ring-black ring-offset-2" : ""}`}
       style={{ aspectRatio: isEbook ? "3/4" : "9/16" }}
     >
-      {item.thumbnailUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={item.thumbnailUrl} alt={title} className="w-full h-full object-cover" />
-      ) : (
-        <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-          {isEbook
-            ? <svg width="24" height="24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            : <svg width="24" height="24" fill="rgba(255,255,255,0.18)" stroke="none" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+      {/* Shimmer — clips without thumbnail, until video frame is ready */}
+      {!isEbook && !item.thumbnailUrl && !frameReady && (
+        <div className="absolute inset-0 shimmer" />
+      )}
+
+      {/* Ebook static placeholder */}
+      {isEbook && !item.thumbnailUrl && (
+        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+          <svg width="28" height="28" fill="none" stroke="#9ca3af" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
         </div>
       )}
 
+      {/* Static thumbnail (base, behind video) */}
+      {item.thumbnailUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={item.thumbnailUrl} alt={title} className="absolute inset-0 w-full h-full object-cover" />
+      )}
+
+      {/* Video — fades in on frameReady, plays with sound on hover */}
       {previewUrl && !isEbook && (
         <video
           ref={videoRef}
           src={previewUrl}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${frameReady ? "opacity-100" : "opacity-0"}`}
           preload="metadata"
-          muted
           playsInline
         />
       )}
 
+      {/* Selection checkbox */}
       {selecting && (
         <div className={`absolute top-2 left-2 w-5 h-5 rounded-md border-2 flex items-center justify-center z-10 ${selected ? "bg-black border-black" : "bg-white/80 border-gray-400"}`}>
           {selected && <svg width="10" height="10" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
         </div>
       )}
 
+      {/* Badges */}
       {!selecting && (
         <>
+          {/* Tier badge — top left */}
           {tier && (
             <div className="absolute top-2 left-2 z-10">
               <span className="text-[8px] font-black tracking-widest text-white bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5 uppercase">{tier}</span>
             </div>
           )}
+
+          {/* Heart — top right */}
           <button onClick={stopAndFavorite}
             className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity ${favorited ? "bg-red-500 !opacity-100" : "bg-black/30 backdrop-blur-sm hover:bg-black/50"}`}>
             <svg width="9" height="9" fill={favorited ? "white" : "none"} stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
+
+          {/* Duration — bottom right */}
           {item.durationSeconds && (
             <div className="absolute bottom-2 right-2 z-10">
               <span className="text-[9px] font-bold text-white bg-black/70 rounded px-1.5 py-0.5">{fmtDuration(item.durationSeconds)}</span>
             </div>
           )}
+
+          {/* Mute toggle — bottom left, clips only, appears on hover */}
+          {!isEbook && previewUrl && (
+            <button onClick={toggleMute}
+              className="absolute bottom-2 left-2 z-10 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-sm hover:bg-black/80">
+              {isMuted ? (
+                <svg width="10" height="10" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              ) : (
+                <svg width="10" height="10" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              )}
+            </button>
+          )}
+
+          {/* Ebook badges */}
           {isEbook && (
             <>
               <div className="absolute bottom-2 left-2 z-10">
@@ -185,7 +246,6 @@ function AssetCard({
     </div>
   )
 
-  // Videos: duration only. Ebooks: title + tags.
   const meta = isEbook ? (
     <>
       <p className="text-[11px] font-medium text-gray-800 truncate">{title}</p>
