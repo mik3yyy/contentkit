@@ -1,7 +1,8 @@
 import Link from "next/link"
 import MarqueeStrip from "@/components/ui/MarqueeStrip"
+import VideoMarqueeStrip, { type VideoItem } from "@/components/ui/VideoMarqueeStrip"
 
-const STRIP_IMAGES = [
+const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=200&h=340&fit=crop&q=75",
   "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=340&fit=crop&q=75",
   "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=340&fit=crop&q=75",
@@ -23,7 +24,7 @@ const AVATARS = [
   "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=40&h=40&fit=crop&q=80",
 ]
 
-export default function Hero() {
+export default function Hero({ items }: { items: VideoItem[] }) {
   return (
     <section className="bg-[#eeecea] pt-20 pb-0 text-center overflow-hidden">
       <div className="max-w-[860px] mx-auto px-6">
@@ -76,8 +77,11 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scrolling strip */}
-      <MarqueeStrip images={STRIP_IMAGES} direction="forward" speed="normal" />
+      {/* Scrolling strip — real thumbnails when available, static fallback otherwise */}
+      {items.length >= 6
+        ? <VideoMarqueeStrip items={items} direction="forward" speed="normal" cardW={155} cardH={210} />
+        : <MarqueeStrip images={FALLBACK_IMAGES} direction="forward" speed="normal" />
+      }
     </section>
   )
 }
