@@ -7,7 +7,7 @@ import ForCreatorsResellers from "@/components/landing/ForCreatorsResellers"
 import TheProblem from "@/components/landing/TheProblem"
 import TheSolution from "@/components/landing/TheSolution"
 import WhatsInside, { type ClipItem, type EbookItem } from "@/components/landing/WhatsInside"
-import NichesSection from "@/components/landing/NichesSection"
+import NichesSection, { type NicheRowData } from "@/components/landing/NichesSection"
 import Testimonials from "@/components/landing/Testimonials"
 import Pricing from "@/components/landing/Pricing"
 import FAQ from "@/components/landing/FAQ"
@@ -19,23 +19,33 @@ import type { VideoItem } from "@/components/ui/VideoMarqueeStrip"
 
 export const revalidate = 3000
 
-async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Record<string, VideoItem[]>> {
-  try {
-    const rows = await prisma.content.findMany({
-      where: { type: "video", niche: { in: niches } },
-      select: { id: true, r2Key: true, thumbnailUrl: true, niche: true },
-      orderBy: { createdAt: "desc" },
-      take: niches.length * perNiche,
-    })
+function formatTitle(key: string): string {
+  if (key === "money-finance") return "Money & Finance"
+  return key.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+}
 
-    const byNiche: Record<string, typeof rows> = {}
-    for (const row of rows) {
-      if (!byNiche[row.niche]) byNiche[row.niche] = []
-      if (byNiche[row.niche].length < perNiche) byNiche[row.niche].push(row)
-    }
+function formatCount(n: number): string {
+  const rounded = Math.floor(n / 100) * 100
+  return `${rounded.toLocaleString()}+ clips`
+}
+
+// Query each niche in parallel with its own take — prevents one niche consuming all slots
+async function fetchNicheVideosIndependent(niches: string[], perNiche: number): Promise<Record<string, VideoItem[]>> {
+  try {
+    const rows = await Promise.all(
+      niches.map(niche =>
+        prisma.content.findMany({
+          where: { type: "video", niche },
+          select: { id: true, r2Key: true, thumbnailUrl: true, niche: true },
+          orderBy: { createdAt: "desc" },
+          take: perNiche,
+        })
+      )
+    )
 
     const entries = await Promise.all(
-      Object.entries(byNiche).map(async ([niche, items]) => {
+      niches.map(async (niche, i) => {
+        const items = rows[i]
         const signed = await Promise.all(
           items.map(async item => ({
             id:           item.id,
@@ -56,17 +66,26 @@ async function fetchNicheVideos(niches: string[], perNiche: number): Promise<Rec
 
 async function fetchClipItems(count: number): Promise<ClipItem[]> {
   try {
-    const rows = await prisma.content.findMany({
-      where: {
-        type: "video",
-        niche: { in: ["luxury", "fitness", "travel", "food", "motivation", "nature", "cars"] },
-      },
-      select: { id: true, r2Key: true, thumbnailUrl: true },
-      orderBy: { createdAt: "desc" },
+    // Pick one video per niche from non-gaming niches so the grid looks varied
+    const niches = await prisma.content.groupBy({
+      by: ["niche"],
+      where: { type: "video", niche: { not: "gaming" } },
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
       take: count,
     })
+    const rows = await Promise.all(
+      niches.map(g =>
+        prisma.content.findFirst({
+          where: { type: "video", niche: g.niche },
+          select: { id: true, r2Key: true, thumbnailUrl: true },
+          orderBy: { createdAt: "desc" },
+        })
+      )
+    )
+    const valid = rows.filter(Boolean) as NonNullable<typeof rows[number]>[]
     return await Promise.all(
-      rows.map(async row => ({
+      valid.map(async row => ({
         id:           row.id,
         videoUrl:     await getDownloadUrl(row.r2Key),
         thumbnailUrl: row.thumbnailUrl,
@@ -92,19 +111,45 @@ async function fetchEbookItems(count: number): Promise<EbookItem[]> {
 }
 
 export default async function LandingPage() {
-  // Hero: luxury + money-finance only for a premium first impression
-  const HERO_NICHES = ["luxury", "money-finance"]
-  // Niches section: all 8 rows
-  const NICHE_ROWS  = ["luxury", "fitness", "money-finance", "motivation", "gaming", "cars", "food", "travel"]
+  // Dynamically discover which niches have videos, ordered by clip count
+  const nicheGroups = await prisma.content.groupBy({
+    by: ["niche"],
+    where: { type: "video" },
+    _count: { id: true },
+    orderBy: { _count: { id: "desc" } },
+    take: 10,
+  }).catch(() => [])
 
-  const [heroRows, nicheRows, clipItems, ebookItems] = await Promise.all([
-    fetchNicheVideos(HERO_NICHES, 10),
-    fetchNicheVideos(NICHE_ROWS, 10),
+  // Gaming goes last; everything else keeps count order
+  const orderedNiches = [
+    ...nicheGroups.filter(g => g.niche !== "gaming"),
+    ...nicheGroups.filter(g => g.niche === "gaming"),
+  ].slice(0, 5)
+
+  const nicheKeys = orderedNiches.map(g => g.niche)
+
+  // Hero: top 2 niches (excludes gaming) for a premium first impression
+  const heroNiches = nicheGroups
+    .filter(g => g.niche !== "gaming")
+    .slice(0, 2)
+    .map(g => g.niche)
+
+  const [heroVideos, nicheVideos, clipItems, ebookItems] = await Promise.all([
+    fetchNicheVideosIndependent(heroNiches, 10),
+    fetchNicheVideosIndependent(nicheKeys, 10),
     fetchClipItems(7),
     fetchEbookItems(16),
   ])
 
-  const heroItems: VideoItem[] = Object.values(heroRows).flat()
+  const heroItems: VideoItem[] = Object.values(heroVideos).flat()
+
+  const nicheRows: NicheRowData[] = orderedNiches.map((g, i) => ({
+    key:       g.niche,
+    title:     formatTitle(g.niche),
+    count:     formatCount(g._count.id),
+    items:     nicheVideos[g.niche] ?? [],
+    direction: (i % 2 === 0 ? "forward" : "reverse") as "forward" | "reverse",
+  }))
 
   return (
     <div className="bg-[#eeecea]">
@@ -115,7 +160,7 @@ export default async function LandingPage() {
       <FadeIn><TheProblem /></FadeIn>
       <FadeIn><TheSolution /></FadeIn>
       <FadeIn><WhatsInside clipItems={clipItems} ebookItems={ebookItems} /></FadeIn>
-      <FadeIn><NichesSection nicheItems={nicheRows} /></FadeIn>
+      <FadeIn><NichesSection rows={nicheRows} /></FadeIn>
       <FadeIn><Testimonials /></FadeIn>
       <FadeIn><Pricing /></FadeIn>
       <FadeIn><FAQ /></FadeIn>
