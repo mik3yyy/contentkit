@@ -8,6 +8,9 @@ const NICHES_TOP = [
 const NICHES_BOT = [
   ["Lifestyle","5,400+"],["Nature","5,200+"],["Cars","4,800+"],["Business","4,600+"],["Gaming","3,900+"],["Animals","3,700+"],
 ]
+const NICHES_SMALL = [
+  "Calisthenics","Real Estate","Crypto","Beauty","Fashion","Tech","Cooking","Self-help","Pets","Mindset",
+]
 
 const TEMPLATES = ["Offer Page","Welcome Email","Hook List","Content Plan","Lead Magnet","Sound Pack"]
 
@@ -146,12 +149,23 @@ export default function WhatsInside({
               </span>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-2 mb-4">
             {NICHES_BOT.map(([n, c]) => (
               <span key={n} className="flex items-center justify-between gap-5 border border-gray-200 rounded-lg px-3 py-2 text-[12px]">
                 <span className="font-medium">{n}</span><span className="text-gray-400">{c}</span>
               </span>
             ))}
+          </div>
+          {/* Smaller extra niches */}
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {NICHES_SMALL.map(n => (
+              <span key={n} className="border border-gray-100 bg-gray-50 rounded-md px-2 py-1 text-[10px] font-medium text-gray-400">
+                {n}
+              </span>
+            ))}
+            <span className="border border-gray-100 bg-gray-50 rounded-md px-2 py-1 text-[10px] font-medium text-gray-300 italic">
+              +40 more…
+            </span>
           </div>
           <p className="text-[10.5px] text-gray-400 uppercase tracking-wider font-semibold">50+ Niches Total · New Content Added Weekly</p>
         </div>
