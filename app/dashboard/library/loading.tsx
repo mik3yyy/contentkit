@@ -25,7 +25,7 @@ export default function LibraryLoading() {
       <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">Loading library</p>
 
       {/* Shimmer grid */}
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {Array.from({ length: 24 }).map((_, i) => (
           <div key={i}>
             <div className="shimmer rounded-xl mb-2" style={{ aspectRatio: "9/16" }} />
