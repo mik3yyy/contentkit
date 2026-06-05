@@ -32,57 +32,49 @@ function fmtDuration(s: number | null) {
   return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
 }
 
-// ─── Download engine ─────────────────────────────────────────────────────────
-// Uses <a href="signedUrl"> navigation — not fetch() — so CORS never applies.
-// Content-Disposition: attachment is embedded in the signed URL server-side.
+// ─── ZIP download engine ──────────────────────────────────────────────────────
+// Server groups files by niche into named folders, returns one .zip blob.
+// Splits large sets into batches of 150 to stay within memory limits.
 
-function triggerDownload(url: string): void {
-  const a = document.createElement("a")
-  a.href = url
-  a.rel = "noopener noreferrer"
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-}
+const ZIP_BATCH = 150
 
-async function runQueue(
-  allIds: string[],
-  onProgress: (done: number, failed: number) => void,
+async function downloadZip(
+  ids: string[],
+  zipName: string,
+  onStatus: (msg: string) => void,
   cancelRef: React.MutableRefObject<boolean>
-) {
-  const BATCH = 20, CONCURRENCY = 3
-  let done = 0
+): Promise<void> {
+  // Split into batches; each becomes its own numbered ZIP file
+  const batches = []
+  for (let i = 0; i < ids.length; i += ZIP_BATCH) batches.push(ids.slice(i, i + ZIP_BATCH))
 
-  for (let b = 0; b < allIds.length; b += BATCH) {
+  for (let b = 0; b < batches.length; b++) {
     if (cancelRef.current) return
+    const batchIds = batches[b]
+    const batchLabel = batches.length > 1 ? ` (part ${b + 1} of ${batches.length})` : ""
+    onStatus(`Building ZIP${batchLabel}… (${batchIds.length} files)`)
 
-    const batchIds = allIds.slice(b, b + BATCH)
-    let urls: { id: string; url: string }[] = []
-    try {
-      const res = await fetch("/api/content/batch-download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: batchIds }),
-      })
-      ;({ urls } = await res.json())
-    } catch {
-      // If batch fetch fails, skip and keep going
-      onProgress((done += batchIds.length), 0)
-      continue
-    }
+    const res = await fetch("/api/content/zip-download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ids: batchIds,
+        zipName: zipName + (batches.length > 1 ? ` part-${b + 1}` : ""),
+      }),
+    })
 
-    const pending = [...urls]
-    const worker = async () => {
-      while (pending.length > 0 && !cancelRef.current) {
-        const item = pending.shift()!
-        triggerDownload(item.url)   // link navigation — zero CORS risk
-        done++
-        onProgress(done, 0)
-        await new Promise(r => setTimeout(r, 350))  // pace between triggers
-      }
-    }
+    if (!res.ok) throw new Error(`ZIP generation failed: ${res.status}`)
 
-    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, pending.length) }, worker))
+    const blob = await res.blob()
+    const objUrl = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = objUrl
+    a.download = (zipName + batchLabel).replace(/[^a-zA-Z0-9 \-_]/g, "").trim() + ".zip"
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(objUrl), 2000)
+
+    // Small gap between batches
+    if (b < batches.length - 1) await new Promise(r => setTimeout(r, 800))
   }
 }
 
@@ -292,31 +284,28 @@ function GridShimmer({ count }: { count: number }) {
 
 // ─── Download progress ───────────────────────────────────────────────────────
 
-interface DlState { done: number; failed: number; total: number; active: boolean }
+interface DlState { status: string; active: boolean; done: boolean; error?: string }
 
 function DownloadProgress({ state, onClose, onCancel }: { state: DlState; onClose: () => void; onCancel: () => void }) {
-  const { done, failed, total, active } = state
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0
-  const finished = done + failed >= total && !active
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white rounded-2xl px-6 py-4 shadow-2xl min-w-[360px]">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white rounded-2xl px-6 py-4 shadow-2xl min-w-[360px] max-w-[480px]">
       <div className="flex items-center justify-between mb-3">
-        <div>
-          <span className="text-[13px] font-semibold">
-            {finished ? `Done — ${done.toLocaleString()} downloaded` : `Downloading ${(done + failed).toLocaleString()} / ${total.toLocaleString()}`}
-          </span>
-          {failed > 0 && <span className="text-[11px] text-red-400 ml-2">{failed} failed</span>}
-        </div>
-        {finished
+        <span className="text-[13px] font-semibold">
+          {state.done ? "ZIP ready — check your downloads" : state.status}
+        </span>
+        {state.done || state.error
           ? <button onClick={onClose} className="text-[12px] text-gray-400 hover:text-white ml-4">✕</button>
           : <button onClick={onCancel} className="text-[12px] text-gray-400 hover:text-red-400 ml-4">Cancel</button>}
       </div>
-      <div className="w-full bg-white/20 rounded-full h-1.5 mb-1.5">
-        <div className="bg-white rounded-full h-1.5 transition-all duration-300" style={{ width: `${pct}%` }} />
-      </div>
-      <p className="text-[11px] text-gray-400">
-        {finished ? (failed > 0 ? `${failed} file(s) could not be downloaded.` : "All files downloaded!") : `${pct}% complete — keep this tab open`}
-      </p>
+      {!state.done && !state.error && (
+        <div className="w-full bg-white/20 rounded-full h-1.5 mb-1.5 overflow-hidden">
+          <div className="shimmer h-full rounded-full" style={{ width: "100%" }} />
+        </div>
+      )}
+      {state.error && <p className="text-[11px] text-red-400">{state.error}</p>}
+      {!state.error && !state.done && (
+        <p className="text-[11px] text-gray-400">Keep this tab open while the ZIP is being built</p>
+      )}
     </div>
   )
 }
@@ -351,7 +340,6 @@ export default function LibraryClient({
   const [selecting, setSelecting]     = useState(false)
   const [selected, setSelected]       = useState<Set<string>>(new Set())
   const [dlState, setDlState]         = useState<DlState | null>(null)
-  const [dlLoading, setDlLoading]     = useState(false)
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({})
   const [searchVal, setSearchVal]     = useState(q ?? "")
   const cancelRef                     = useRef(false)
@@ -408,27 +396,47 @@ export default function LibraryClient({
   const selectAll = () => setSelected(new Set(items.map(i => i.id)))
   const clearAll  = () => { setSelected(new Set()); setSelecting(false) }
 
-  const downloadSelected = async (ids: string[]) => {
+  const startZipDownload = async (ids: string[], zipName: string) => {
     cancelRef.current = false
-    setDlState({ done: 0, failed: 0, total: ids.length, active: true })
-    await runQueue(ids, (done, failed) => setDlState({ done, failed, total: ids.length, active: true }), cancelRef)
-    setDlState(prev => prev ? { ...prev, active: false } : null)
-  }
-  const downloadAll = async () => {
-    setDlLoading(true)
+    setDlState({ status: "Preparing ZIP…", active: true, done: false })
     try {
-      const params = new URLSearchParams()
-      if (niche) params.set("niche", niche); if (type) params.set("type", type)
-      if (tag)   params.set("tag",   tag);   if (q)    params.set("q",    q)
-      const { ids } = await fetch(`/api/content/ids?${params}`).then(r => r.json()) as { ids: string[] }
-      if (!ids?.length) return
-      cancelRef.current = false
-      setDlState({ done: 0, failed: 0, total: ids.length, active: true })
-      await runQueue(ids, (done, failed) => setDlState({ done, failed, total: ids.length, active: true }), cancelRef)
-      setDlState(prev => prev ? { ...prev, active: false } : null)
-    } finally { setDlLoading(false) }
+      await downloadZip(
+        ids,
+        zipName,
+        (msg) => setDlState({ status: msg, active: true, done: false }),
+        cancelRef
+      )
+      setDlState({ status: "Done", active: false, done: true })
+    } catch (err) {
+      if (!cancelRef.current) {
+        setDlState({ status: "Error", active: false, done: false, error: String(err) })
+      } else {
+        setDlState(null)
+      }
+    }
   }
-  const cancelDownload = () => { cancelRef.current = true; setDlState(prev => prev ? { ...prev, active: false } : null) }
+
+  const downloadSelected = async (ids: string[]) => {
+    const label = niche ? niche.replace(/-/g, " ") : (type === "video" ? "clips" : type ?? "content")
+    await startZipDownload(ids, `contentkit-${label}`)
+  }
+
+  const downloadAll = async () => {
+    const params = new URLSearchParams()
+    if (niche) params.set("niche", niche); if (type) params.set("type", type)
+    if (tag)   params.set("tag",   tag);   if (q)    params.set("q",    q)
+    setDlState({ status: "Fetching list…", active: true, done: false })
+    try {
+      const { ids } = await fetch(`/api/content/ids?${params}`).then(r => r.json()) as { ids: string[] }
+      if (!ids?.length) { setDlState(null); return }
+      const label = niche ? niche.replace(/-/g, " ") : (type === "video" ? "clips" : type ?? "content")
+      await startZipDownload(ids, `contentkit-${label}`)
+    } catch (err) {
+      setDlState({ status: "Error", active: false, done: false, error: String(err) })
+    }
+  }
+
+  const cancelDownload = () => { cancelRef.current = true; setDlState(null) }
 
   return (
     <div className="max-w-[1300px] mx-auto px-8 py-8">
@@ -531,12 +539,12 @@ export default function LibraryClient({
           <button onClick={clearAll}  className="text-[12px] text-gray-500 hover:text-black underline">Clear</button>
           {selected.size > 0 && (
             <div className="ml-auto">
-              <button onClick={() => downloadSelected([...selected])}
-                className="flex items-center gap-2 bg-black text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-900 transition-colors">
-                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <button onClick={() => downloadSelected([...selected])} disabled={!!dlState?.active}
+                className="flex items-center gap-2 bg-black text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50">
+                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Download {selected.size} {selected.size === 1 ? "file" : "files"}
+                Download {selected.size} as ZIP
               </button>
             </div>
           )}
@@ -551,12 +559,12 @@ export default function LibraryClient({
           {isPending ? "Loading…" : `${total.toLocaleString()} ${typeLabel}`}
         </p>
         {!selecting && total > 0 && !isPending && (
-          <button onClick={downloadAll} disabled={dlLoading || dlState?.active}
+          <button onClick={downloadAll} disabled={!!dlState?.active}
             className="flex items-center gap-2 bg-black text-white text-[12.5px] font-semibold px-4 py-2 rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            {dlLoading ? "Preparing…" : `Download all ${total.toLocaleString()} ${typeLabel}`}
+            Download all as ZIP ({total.toLocaleString()} {typeLabel})
           </button>
         )}
       </div>
