@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Footer() {
   return (
@@ -7,13 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-12">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
-                <svg width="13" height="13" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg>
-              </div>
+              <Image src="/icon.png" alt="ContentKit" width={28} height={28} className="rounded-lg" />
               <span className="font-bold text-[15px]">ContentKit</span>
             </Link>
             <p className="text-[11px] text-gray-400 mb-4">

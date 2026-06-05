@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 function ResetForm() {
   const searchParams = useSearchParams()
@@ -32,13 +33,7 @@ function ResetForm() {
     <div className="min-h-screen bg-[#eeecea] flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl p-10 w-full max-w-[400px] shadow-lg border border-gray-100">
         <Link href="/" className="inline-flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-            <svg width="16" height="16" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-              <line x1="12" y1="22.08" x2="12" y2="12" />
-            </svg>
-          </div>
+          <Image src="/icon.png" alt="ContentKit" width={32} height={32} className="rounded-lg" />
           <span className="font-bold text-[17px] tracking-tight">ContentKit</span>
         </Link>
 

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import CheckoutForm from "./CheckoutForm"
 
 export default function CheckoutPage() {
@@ -7,13 +8,7 @@ export default function CheckoutPage() {
         {/* Left: summary */}
         <div className="pt-4">
           <div className="flex items-center gap-2.5 mb-8">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <svg width="15" height="15" fill="none" stroke="white" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                <line x1="12" y1="22.08" x2="12" y2="12" />
-              </svg>
-            </div>
+            <Image src="/icon.png" alt="ContentKit" width={32} height={32} className="rounded-lg" />
             <span className="font-bold text-[17px]">ContentKit</span>
           </div>
 
