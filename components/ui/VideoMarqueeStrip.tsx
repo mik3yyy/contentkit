@@ -21,33 +21,47 @@ function VideoCard({ item, active, cardW, cardH }: {
   item: VideoItem; active: boolean; cardW: number; cardH: number
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
-    // iOS Safari ignores the autoplay attribute — must call play() programmatically.
-    // preload="metadata" ensures enough data is buffered for play() to succeed.
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {})
+    // When strip leaves viewport: reset so shimmer shows again on re-entry
+    if (!active) {
+      setPlaying(false)
+      return
     }
-  }, [])
+
+    const v = videoRef.current
+    if (!v) return
+
+    const onPlaying = () => setPlaying(true)
+    // canplay fires when enough data is buffered — retry play() here for iOS
+    const onCanPlay = () => { v.play().catch(() => {}) }
+
+    v.addEventListener("playing", onPlaying)
+    v.addEventListener("canplay", onCanPlay)
+
+    // First attempt — may succeed immediately or wait for canplay
+    v.play().catch(() => {})
+
+    return () => {
+      v.removeEventListener("playing", onPlaying)
+      v.removeEventListener("canplay", onCanPlay)
+    }
+  }, [active]) // runs whenever active flips — NOT just on mount
 
   return (
     <div
       className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-900"
       style={{ width: cardW, height: cardH }}
     >
-      {item.thumbnailUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.thumbnailUrl}
-          alt={item.niche}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      )}
+      {/* Shimmer while video hasn't started — never shows a frozen frame or play icon */}
+      {!playing && <div className="absolute inset-0 shimmer-dark" />}
 
+      {/* Video — opacity-0 until playing fires, then fades in */}
       {active && item.videoUrl && (
         <video
           ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
           src={item.videoUrl}
           autoPlay
           muted
@@ -84,8 +98,7 @@ export default function VideoMarqueeStrip({
   }, [])
 
   const videoItems = items.filter(i => i.videoUrl)
-  // Cap at 8 per strip — 16 total when doubled — enough for any viewport.
-  // Keeps simultaneous decoder count low on mobile.
+  // Cap at 8 per strip (16 doubled) — keeps simultaneous decoder count low on mobile
   const capped = videoItems.slice(0, 8)
   const doubled = [...capped, ...capped]
   const cls = direction === "reverse" ? "marquee-rev" : speed === "slow" ? "marquee-slow" : "marquee"

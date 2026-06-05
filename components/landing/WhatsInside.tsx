@@ -17,20 +17,36 @@ const TEMPLATES = ["Offer Page","Welcome Email","Hook List","Content Plan","Lead
 export type ClipItem  = { id: string; videoUrl: string; thumbnailUrl: string | null }
 export type EbookItem = { id: string; thumbnailUrl: string | null; title: string }
 
-// ── Autoplay video — calls play() after mount for iOS Safari compatibility ────
+// ── Autoplay video — shimmer until playing, then fade in ─────────────────────
 
 function AutoplayVideo({ src, className }: { src: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(false)
+
   useEffect(() => {
-    ref.current?.play().catch(() => {})
+    const v = ref.current
+    if (!v) return
+    const onPlaying = () => setPlaying(true)
+    const onCanPlay = () => { v.play().catch(() => {}) }
+    v.addEventListener("playing", onPlaying)
+    v.addEventListener("canplay", onCanPlay)
+    v.play().catch(() => {})
+    return () => {
+      v.removeEventListener("playing", onPlaying)
+      v.removeEventListener("canplay", onCanPlay)
+    }
   }, [])
+
   return (
-    <video
-      ref={ref}
-      src={src}
-      autoPlay muted loop playsInline preload="metadata"
-      className={className}
-    />
+    <>
+      {!playing && <div className="absolute inset-0 shimmer-dark" />}
+      <video
+        ref={ref}
+        src={src}
+        autoPlay muted loop playsInline preload="metadata"
+        className={`${className ?? ""} transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
+      />
+    </>
   )
 }
 

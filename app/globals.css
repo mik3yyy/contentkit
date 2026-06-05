@@ -63,3 +63,8 @@ html {
   background-size: 1000px 100%;
   animation: shimmer 1.4s infinite linear;
 }
+.shimmer-dark {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 37%, #1f2937 63%);
+  background-size: 1000px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
