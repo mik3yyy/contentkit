@@ -8,12 +8,12 @@ import TheProblem from "@/components/landing/TheProblem"
 import TheSolution from "@/components/landing/TheSolution"
 import WhatsInside, { type ClipItem, type EbookItem } from "@/components/landing/WhatsInside"
 import NichesSection, { type NicheRowData } from "@/components/landing/NichesSection"
-import Testimonials from "@/components/landing/Testimonials"
 import Pricing from "@/components/landing/Pricing"
 import FAQ from "@/components/landing/FAQ"
 import DarkCTA from "@/components/landing/DarkCTA"
 import Footer from "@/components/landing/Footer"
 import StickyBar from "@/components/landing/StickyBar"
+import NewMemberToast from "@/components/landing/NewMemberToast"
 import FadeIn from "@/components/ui/FadeIn"
 import type { VideoItem } from "@/components/ui/VideoMarqueeStrip"
 
@@ -161,12 +161,12 @@ export default async function LandingPage() {
       <FadeIn><TheSolution /></FadeIn>
       <FadeIn><WhatsInside clipItems={clipItems} ebookItems={ebookItems} /></FadeIn>
       <FadeIn><NichesSection rows={nicheRows} /></FadeIn>
-      <FadeIn><Testimonials /></FadeIn>
       <FadeIn><Pricing /></FadeIn>
       <FadeIn><FAQ /></FadeIn>
       <FadeIn><DarkCTA /></FadeIn>
       <FadeIn><Footer /></FadeIn>
       <StickyBar />
+      <NewMemberToast />
     </div>
   )
 }
