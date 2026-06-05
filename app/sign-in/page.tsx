@@ -2,11 +2,13 @@
 
 import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 
 function SignInForm() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard"
 
@@ -55,10 +57,21 @@ function SignInForm() {
   return (
     <div className="min-h-screen bg-[#eeecea] flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl p-10 w-full max-w-[400px] shadow-lg border border-gray-100">
-        <Link href="/" className="inline-flex items-center gap-2 mb-8">
-          <Image src="/icon.png" alt="ContentKit" width={32} height={32} className="rounded-lg" />
-          <span className="font-bold text-[17px] tracking-tight">ContentKit</span>
-        </Link>
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-[13px] text-gray-400 hover:text-black transition-colors"
+          >
+            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back
+          </button>
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Image src="/icon.png" alt="ContentKit" width={32} height={32} className="rounded-lg" />
+            <span className="font-bold text-[17px] tracking-tight">ContentKit</span>
+          </Link>
+        </div>
 
         <h1 className="text-[24px] font-bold text-black mb-1">Welcome back</h1>
         <p className="text-[14px] text-gray-500 mb-8">Sign in to access your content library.</p>
