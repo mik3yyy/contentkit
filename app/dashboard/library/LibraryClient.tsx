@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { getGlobalMuted, setGlobalMuted } from "@/lib/videoPreviewState"
 
 interface ContentItem {
   id: string
@@ -88,7 +89,7 @@ function AssetCard({
 }) {
   const [favorited, setFavorited]   = useState(false)
   const [frameReady, setFrameReady] = useState(false)
-  const [isMuted, setIsMuted]       = useState(true)   // user's mute preference
+  const [isMuted, setIsMuted]       = useState(() => getGlobalMuted())
   const videoRef = useRef<HTMLVideoElement>(null)
   const title    = cleanTitle(item.title)
   const isEbook  = item.type === "ebook"
@@ -113,10 +114,14 @@ function AssetCard({
   const handleMouseEnter = async () => {
     const v = videoRef.current
     if (!v || isEbook) return
-    v.muted = isMuted
+    // Always read the current global preference so hovering a new card
+    // honours whatever mute state the user last set on any card.
+    const currentMuted = getGlobalMuted()
+    setIsMuted(currentMuted)
+    v.muted = true   // start muted so autoplay is allowed
     try {
       await v.play()
-      if (!isMuted) v.muted = false  // restore user preference after play succeeds
+      if (!currentMuted) v.muted = false   // unmute after play starts
     } catch {
       v.muted = true
       v.play().catch(() => {})
@@ -124,13 +129,13 @@ function AssetCard({
   }
   const handleMouseLeave = () => {
     if (videoRef.current) videoRef.current.pause()
-    // preserve isMuted preference for next hover
   }
 
   const toggleMute = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation()
     const next = !isMuted
     setIsMuted(next)
+    setGlobalMuted(next)   // propagate to all future card hovers
     if (videoRef.current) videoRef.current.muted = next
   }
 
