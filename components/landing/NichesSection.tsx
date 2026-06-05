@@ -23,7 +23,7 @@ function NicheRow({ title, count, items, direction }: Omit<NicheRowData, "key">)
 
 export default function NichesSection({ rows }: { rows: NicheRowData[] }) {
   return (
-    <section id="niches" className="bg-[#eeecea] pt-8 pb-16">
+    <section id="niches" className="hidden md:block bg-[#eeecea] pt-8 pb-16">
       <div className="max-w-[1160px] mx-auto px-6 mb-10">
         <h2 className="font-black tracking-tight text-black inline" style={{ fontSize: "clamp(36px,5vw,58px)" }}>Every niche.</h2>
         <span className="font-light italic tracking-tight text-gray-400 ml-3" style={{ fontSize: "clamp(36px,5vw,58px)" }}>Ready to post.</span>
