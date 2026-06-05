@@ -25,8 +25,8 @@ function formatTitle(key: string): string {
 }
 
 function formatCount(n: number): string {
-  const rounded = Math.floor(n / 100) * 100
-  return `${rounded.toLocaleString()}+ clips`
+  const thousands = Math.max(1, Math.floor(n / 1000))
+  return `${(thousands * 1000).toLocaleString()}+ clips`
 }
 
 // Query each niche in parallel with its own take — prevents one niche consuming all slots
