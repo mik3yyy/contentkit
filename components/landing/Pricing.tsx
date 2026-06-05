@@ -11,7 +11,7 @@ const FEATURES = [
 export default function Pricing() {
   return (
     <section id="pricing" className="bg-[#eeecea] py-12 md:py-24 min-h-screen flex flex-col justify-center">
-      <div className="max-w-[1040px] mx-auto px-6 w-full">
+      <div className="max-w-[1040px] mx-auto px-3 sm:px-6 w-full">
 
         {/* Header */}
         <div className="text-center mb-10">
@@ -106,7 +106,7 @@ export default function Pricing() {
           </div>
 
           {/* Right — checkout form (shows first on mobile) */}
-          <div className="bg-white p-10 flex flex-col justify-center order-1 md:order-2">
+          <div className="bg-white p-5 sm:p-7 md:p-10 flex flex-col justify-center order-1 md:order-2">
             <div className="flex items-center justify-between mb-6">
               <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-gray-400">Checkout</span>
               <span className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400">
