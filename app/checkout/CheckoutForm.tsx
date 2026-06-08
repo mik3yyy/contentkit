@@ -32,20 +32,13 @@ function PaymentForm({ clientSecret }: { clientSecret: string }) {
       return
     }
 
-    // Attach the email to the payment intent before confirming —
-    // this is what the webhook and verify-payment endpoint read.
-    try {
-      const updateRes = await fetch("/api/stripe/update-payment-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientSecret, email }),
-      })
-      if (!updateRes.ok) throw new Error("Could not save email")
-    } catch {
-      setError("Something went wrong. Please try again.")
-      setLoading(false)
-      return
-    }
+    // Fire-and-forget: save email to PI metadata so the webhook has it,
+    // but never let this block the actual payment confirmation.
+    fetch("/api/stripe/update-payment-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientSecret, email }),
+    }).catch(() => {/* best-effort */})
 
     // redirect: 'if_required' means:
     //   - Apple Pay / Google Pay → completes inline, no redirect, we handle below
@@ -55,7 +48,13 @@ function PaymentForm({ clientSecret }: { clientSecret: string }) {
 
     const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: returnUrl },
+      confirmParams: {
+        return_url: returnUrl,
+        // Provide billing email explicitly since the PaymentElement is set to
+        // not collect it (fields.billingDetails.email = "never").
+        // This ensures it is attached to the charge for webhook + verify-payment.
+        payment_method_data: { billing_details: { email } },
+      },
       redirect: "if_required",
     })
 
