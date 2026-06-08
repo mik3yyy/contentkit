@@ -48,7 +48,7 @@ export default function FreeSampleCTA() {
         <h2 className="text-[28px] sm:text-[38px] md:text-[50px] font-black tracking-tight leading-[1.05] text-black mb-4">
           Not sure yet?
           <br />
-          <span className="font-light italic text-gray-400">Download 300 clips free.</span>
+          <span className="font-light italic text-gray-400">Download 100 clips free.</span>
         </h2>
 
         <p className="text-[15px] md:text-[17px] text-gray-500 leading-relaxed mb-10 max-w-[540px] mx-auto">
