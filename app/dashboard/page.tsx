@@ -45,6 +45,16 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* Content launch notice */}
+      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3.5 mb-6">
+        <svg width="16" height="16" fill="none" stroke="#d97706" strokeWidth="2" viewBox="0 0 24 24" className="shrink-0">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <p className="text-[13px] text-amber-800 font-medium">
+          <span className="font-bold">June 11 —</span> The full library arrives: 100,000+ videos, 500+ ebooks, and all clips will be fully loaded. Everything will be available to download.
+        </p>
+      </div>
+
       {/* Stats row */}
       <div className="grid grid-cols-3 border border-gray-200 rounded-2xl overflow-hidden mb-6">
         <div className="p-3 sm:p-5 border-r border-gray-200">
