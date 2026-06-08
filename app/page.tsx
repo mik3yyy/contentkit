@@ -8,6 +8,7 @@ import TheProblem from "@/components/landing/TheProblem"
 import TheSolution from "@/components/landing/TheSolution"
 import WhatsInside, { type ClipItem, type EbookItem } from "@/components/landing/WhatsInside"
 import NichesSection, { type NicheRowData } from "@/components/landing/NichesSection"
+import FreeSampleCTA from "@/components/landing/FreeSampleCTA"
 import Pricing from "@/components/landing/Pricing"
 import FAQ from "@/components/landing/FAQ"
 import DarkCTA from "@/components/landing/DarkCTA"
@@ -161,6 +162,7 @@ export default async function LandingPage() {
       <FadeIn><TheSolution /></FadeIn>
       <FadeIn><WhatsInside clipItems={clipItems} ebookItems={ebookItems} /></FadeIn>
       <FadeIn><NichesSection rows={nicheRows} /></FadeIn>
+      <FadeIn><FreeSampleCTA /></FadeIn>
       <FadeIn><Pricing /></FadeIn>
       <FadeIn><FAQ /></FadeIn>
       <FadeIn><DarkCTA /></FadeIn>
