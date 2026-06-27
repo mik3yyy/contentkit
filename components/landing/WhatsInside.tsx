@@ -17,7 +17,7 @@ const TEMPLATES = ["Offer Page","Welcome Email","Hook List","Content Plan","Lead
 export type ClipItem  = { id: string; videoUrl: string; thumbnailUrl: string | null }
 export type EbookItem = { id: string; thumbnailUrl: string | null; title: string }
 
-// ── Autoplay video — shimmer until playing, then fade in ─────────────────────
+// ── Autoplay video — preloads when near viewport so it's already playing when visible ──
 
 function AutoplayVideo({ src, className }: { src: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null)
@@ -26,27 +26,25 @@ function AutoplayVideo({ src, className }: { src: string; className?: string }) 
   useEffect(() => {
     const v = ref.current
     if (!v) return
-    const onPlaying = () => setPlaying(true)
-    const onCanPlay = () => { v.play().catch(() => {}) }
-    v.addEventListener("playing", onPlaying)
-    v.addEventListener("canplay", onCanPlay)
-    v.play().catch(() => {})
-    return () => {
-      v.removeEventListener("playing", onPlaying)
-      v.removeEventListener("canplay", onCanPlay)
-    }
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) v.play().catch(() => {})
+        else v.pause()
+      },
+      { threshold: 0.1, rootMargin: "300px 0px 0px 0px" }
+    )
+    obs.observe(v)
+    return () => obs.disconnect()
   }, [])
 
   return (
-    <>
-      {!playing && <div className="absolute inset-0 shimmer-dark" />}
-      <video
-        ref={ref}
-        src={src}
-        autoPlay muted loop playsInline preload="metadata"
-        className={`${className ?? ""} transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
-      />
-    </>
+    <video
+      ref={ref}
+      src={src}
+      autoPlay muted loop playsInline preload="auto"
+      className={`${className ?? ""} transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
+      onPlaying={() => setPlaying(true)}
+    />
   )
 }
 
@@ -165,13 +163,9 @@ export default function WhatsInside({
                 // On mobile only 3 clips play — fewer simultaneous decoders = smoother playback
                 <div
                   key={item.id}
-                  className={`relative rounded-xl overflow-hidden bg-gray-900 ${idx >= 3 ? "hidden md:block" : ""}`}
+                  className={`relative rounded-xl overflow-hidden bg-gray-200 ${idx >= 3 ? "hidden md:block" : ""}`}
                   style={{ height: 175 }}
                 >
-                  {item.thumbnailUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={item.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                  )}
                   <AutoplayVideo src={item.videoUrl} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               ))}

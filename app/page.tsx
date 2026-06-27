@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db"
-import { getDownloadUrl } from "@/lib/r2"
+import { getPublicUrl } from "@/lib/r2"
 import Navbar from "@/components/landing/Navbar"
 import Hero from "@/components/landing/Hero"
 import AsSeenOn from "@/components/landing/AsSeenOn"
@@ -44,22 +44,17 @@ async function fetchNicheVideosIndependent(niches: string[], perNiche: number): 
       )
     )
 
-    const entries = await Promise.all(
-      niches.map(async (niche, i) => {
-        const items = rows[i]
-        const signed = await Promise.all(
-          items.map(async item => ({
-            id:           item.id,
-            videoUrl:     await getDownloadUrl(item.r2Key),
-            thumbnailUrl: item.thumbnailUrl,
-            niche:        item.niche,
-          } satisfies VideoItem))
-        )
-        return [niche, signed] as const
-      })
+    return Object.fromEntries(
+      niches.map((niche, i) => [
+        niche,
+        rows[i].map(item => ({
+          id:           item.id,
+          videoUrl:     getPublicUrl(item.r2Key),
+          thumbnailUrl: item.thumbnailUrl,
+          niche:        item.niche,
+        } satisfies VideoItem)),
+      ])
     )
-
-    return Object.fromEntries(entries)
   } catch {
     return {}
   }
@@ -85,13 +80,11 @@ async function fetchClipItems(count: number): Promise<ClipItem[]> {
       )
     )
     const valid = rows.filter(Boolean) as NonNullable<typeof rows[number]>[]
-    return await Promise.all(
-      valid.map(async row => ({
-        id:           row.id,
-        videoUrl:     await getDownloadUrl(row.r2Key),
-        thumbnailUrl: row.thumbnailUrl,
-      }))
-    )
+    return valid.map(row => ({
+      id:           row.id,
+      videoUrl:     getPublicUrl(row.r2Key),
+      thumbnailUrl: row.thumbnailUrl,
+    }))
   } catch {
     return []
   }

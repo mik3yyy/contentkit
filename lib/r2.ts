@@ -1,6 +1,12 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
+// Stable Cloudflare CDN URL — cacheable, no AWS overhead, used for landing page previews.
+export function getPublicUrl(key: string): string {
+  const base = (process.env.R2_PUBLIC_URL ?? "").replace(/\/$/, "")
+  return `${base}/${key}`
+}
+
 const r2 = new S3Client({
   region: "auto",
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
