@@ -36,7 +36,7 @@ function AutoplayVideo({ src, className }: { src: string; className?: string }) 
     if (!el) return
     // Mobile: only mount+play when actually in view (tight margin).
     // Desktop: preload 300px ahead so video is ready before visible.
-    const margin = isMobile ? "40px 0px" : "300px 0px"
+    const margin = isMobile ? "400px 0px" : "300px 0px"
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {

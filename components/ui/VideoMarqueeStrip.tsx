@@ -20,42 +20,49 @@ interface Props {
 
 function VideoCard({ item, mounted, isMobile, cardW, cardH }: {
   item: VideoItem
-  mounted: boolean    // desktop: strip-level gate
-  isMobile: boolean   // mobile: per-card gate
+  mounted: boolean
+  isMobile: boolean
   cardW: number
   cardH: number
 }) {
-  const cardRef  = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const cardRef      = useRef<HTMLDivElement>(null)
+  const videoRef     = useRef<HTMLVideoElement>(null)
   const [playing,     setPlaying]     = useState(false)
-  const [selfMounted, setSelfMounted] = useState(false)  // mobile only
+  const [selfMounted, setSelfMounted] = useState(false)
   const inView = useRef(false)
 
-  // Per-card observer — always on the div.
-  // Desktop: controls play/pause only (video already mounted by strip).
-  // Mobile: also gates whether the video element exists (per-card lazy).
+  // Per-card observer: always on the div wrapper.
+  // Mobile: mounts video when card is 400px from viewport, starts downloading immediately.
+  // Desktop: controls play/pause only (strip-level observer handles mounting).
   useEffect(() => {
     const el = cardRef.current
     if (!el) return
     const obs = new IntersectionObserver(
       ([entry]) => {
         inView.current = entry.isIntersecting
-        // Mobile: mount this card's video when it enters the viewport.
         if (isMobile && entry.isIntersecting) setSelfMounted(true)
         const v = videoRef.current
         if (!v) return
         if (entry.isIntersecting) v.play().catch(() => {})
         else v.pause()
       },
-      // Mobile: 80px lookahead so video loads just before visible.
-      // Desktop: no margin needed — strip-level preloading handles it.
-      { threshold: 0.01, rootMargin: isMobile ? "80px 0px" : "0px" }
+      // 400px lookahead on mobile: card starts downloading well before user reaches it.
+      { threshold: 0.01, rootMargin: isMobile ? "400px 0px" : "0px" }
     )
     obs.observe(el)
     return () => obs.disconnect()
   }, [isMobile])
 
-  // Desktop: when the strip mounts all videos, play if this card is already in view.
+  // Mobile: once the video element mounts (selfMounted flips), call play() if already in view.
+  // This closes the race where the observer fired before the <video> existed in the DOM.
+  useEffect(() => {
+    if (!isMobile || !selfMounted) return
+    const v = videoRef.current
+    if (!v) return
+    if (inView.current) v.play().catch(() => {})
+  }, [selfMounted, isMobile])
+
+  // Desktop: play when the strip-level batch mount fires.
   useEffect(() => {
     if (isMobile) return
     const v = videoRef.current
@@ -63,7 +70,6 @@ function VideoCard({ item, mounted, isMobile, cardW, cardH }: {
     if (inView.current) v.play().catch(() => {})
   }, [mounted, isMobile])
 
-  // Desktop: strip gate. Mobile: per-card gate.
   const shouldMount = isMobile ? selfMounted : mounted
 
   return (
@@ -81,9 +87,9 @@ function VideoCard({ item, mounted, isMobile, cardW, cardH }: {
           muted
           loop
           playsInline
-          // Desktop: auto so all strip videos preload before visible.
-          // Mobile: metadata to avoid any buffering until play() is called.
-          preload={isMobile ? "metadata" : "auto"}
+          // preload="auto" on mobile too: as soon as the element mounts (400px ahead),
+          // browser starts buffering so video is ready before user scrolls to it.
+          preload="auto"
           onPlaying={() => setPlaying(true)}
         />
       )}
@@ -100,7 +106,6 @@ export default function VideoMarqueeStrip({
   cardH = 210,
   eager = false,
 }: Props) {
-  // Always start unmounted — useEffect detects device and sets the right strategy.
   const [mounted,  setMounted]  = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const stripRef = useRef<HTMLDivElement>(null)
@@ -109,18 +114,13 @@ export default function VideoMarqueeStrip({
     const mobile = window.innerWidth < 768
     setIsMobile(mobile)
 
-    if (mobile) {
-      // Mobile: per-card lazy loading in VideoCard handles everything. No strip-level mount.
-      return
-    }
+    if (mobile) return // mobile: per-card VideoCard handles mounting
 
-    // Desktop eager (hero): mount all videos immediately.
     if (eager) {
       setMounted(true)
       return
     }
 
-    // Desktop non-eager: mount all videos when strip is 600px from viewport.
     const el = stripRef.current
     if (!el) return
     const obs = new IntersectionObserver(
@@ -134,12 +134,9 @@ export default function VideoMarqueeStrip({
   const videoItems = items.filter(i => i.videoUrl)
   const unique = videoItems.slice(0, 6)
   const stride = cardW + 10
-
-  // Mobile screens (~430px) need far fewer cards than desktop (1920px).
-  // Each firstCopy must be wider than the screen or the seamless loop shows a gap.
   const minLen = isMobile
-    ? Math.ceil(430 / stride) + 1   // ~4 items → 8 doubled — light on mobile
-    : Math.ceil(1920 / stride) + 2  // ~14 items → 28 doubled — gap-free on desktop
+    ? Math.ceil(430 / stride) + 1
+    : Math.ceil(1920 / stride) + 2
   const firstCopy = unique.length > 0
     ? Array.from({ length: Math.max(minLen, unique.length) }, (_, i) => unique[i % unique.length])
     : []
