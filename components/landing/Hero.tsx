@@ -79,7 +79,7 @@ export default function Hero({ items }: { items: VideoItem[] }) {
 
       {/* Scrolling strip — real thumbnails when available, static fallback otherwise */}
       {items.length >= 6
-        ? <VideoMarqueeStrip items={items} direction="forward" speed="normal" cardW={155} cardH={210} />
+        ? <VideoMarqueeStrip items={items} direction="forward" speed="normal" cardW={155} cardH={210} eager />
         : <MarqueeStrip images={FALLBACK_IMAGES} direction="forward" speed="normal" />
       }
     </section>

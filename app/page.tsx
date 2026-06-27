@@ -129,9 +129,9 @@ export default async function LandingPage() {
     .map(g => g.niche)
 
   const [heroVideos, nicheVideos, clipItems, ebookItems] = await Promise.all([
-    fetchNicheVideosIndependent(heroNiches, 10),
-    fetchNicheVideosIndependent(nicheKeys, 10),
-    fetchClipItems(7),
+    fetchNicheVideosIndependent(heroNiches, 6),
+    fetchNicheVideosIndependent(nicheKeys, 6),
+    fetchClipItems(5),
     fetchEbookItems(16),
   ])
 

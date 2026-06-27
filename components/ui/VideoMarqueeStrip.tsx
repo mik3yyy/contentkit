@@ -15,38 +15,42 @@ interface Props {
   speed?: "normal" | "slow"
   cardW?: number
   cardH?: number
+  eager?: boolean
 }
 
-function VideoCard({ item, cardW, cardH }: {
-  item: VideoItem; cardW: number; cardH: number
+function VideoCard({ item, mounted, cardW, cardH }: {
+  item: VideoItem; mounted: boolean; cardW: number; cardH: number
 }) {
   const cardRef  = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [inView, setInView]   = useState(false)
   const [playing, setPlaying] = useState(false)
-  // Once mounted, keep the video element in the DOM — never unmount so the buffer is preserved.
-  const hasLoaded = useRef(false)
-  if (inView) hasLoaded.current = true
+  // Track current intersection state so we can play immediately when video mounts.
+  const inView = useRef(false)
 
-  // Per-card observer: load and play only this card when it's near the viewport.
-  // rootMargin of 400px pre-loads the next few cards before they're visible.
+  // Observer on the div (always in DOM). Controls play/pause only — never unmount.
   useEffect(() => {
     const el = cardRef.current
     if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.01, rootMargin: "0px 400px 0px 400px" }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        inView.current = entry.isIntersecting
+        const v = videoRef.current
+        if (!v) return
+        if (entry.isIntersecting) v.play().catch(() => {})
+        else v.pause()
+      },
+      { threshold: 0.01 }
     )
-    observer.observe(el)
-    return () => observer.disconnect()
+    obs.observe(el)
+    return () => obs.disconnect()
   }, [])
 
+  // When the video element mounts (strip enters preload zone), play if card is already visible.
   useEffect(() => {
     const v = videoRef.current
-    if (!v) return
-    if (inView) v.play().catch(() => {})
-    else v.pause()
-  }, [inView])
+    if (!v || !mounted) return
+    if (inView.current) v.play().catch(() => {})
+  }, [mounted])
 
   return (
     <div
@@ -54,7 +58,7 @@ function VideoCard({ item, cardW, cardH }: {
       className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-200"
       style={{ width: cardW, height: cardH }}
     >
-      {hasLoaded.current && item.videoUrl && (
+      {mounted && item.videoUrl && (
         <video
           ref={videoRef}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
@@ -78,14 +82,35 @@ export default function VideoMarqueeStrip({
   speed = "normal",
   cardW = 155,
   cardH = 210,
+  eager = false,
 }: Props) {
+  // eager=true (hero): mount all videos immediately on page load — highest priority.
+  // eager=false (below fold): mount all videos when strip is 600px from viewport.
+  const [mounted, setMounted] = useState(eager)
+  const stripRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (eager) return
+    const el = stripRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setMounted(true) },
+      { threshold: 0, rootMargin: "600px 0px" }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [eager])
+
   const videoItems = items.filter(i => i.videoUrl)
-  const capped = videoItems.slice(0, 8)
+  // 6 per strip keeps memory lean; doubled for seamless CSS marquee loop.
+  // The browser serves the second copy from cache (same URL), so no extra network hit.
+  const capped = videoItems.slice(0, 6)
   const doubled = [...capped, ...capped]
   const cls = direction === "reverse" ? "marquee-rev" : speed === "slow" ? "marquee-slow" : "marquee"
 
   return (
     <div
+      ref={stripRef}
       className="overflow-hidden w-full"
       style={{
         maskImage: "linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)",
@@ -94,7 +119,7 @@ export default function VideoMarqueeStrip({
     >
       <div className={`${cls} px-3`} style={{ gap: 10 }}>
         {doubled.map((item, i) => (
-          <VideoCard key={`${item.id}-${i}`} item={item} cardW={cardW} cardH={cardH} />
+          <VideoCard key={`${item.id}-${i}`} item={item} mounted={mounted} cardW={cardW} cardH={cardH} />
         ))}
       </div>
     </div>
