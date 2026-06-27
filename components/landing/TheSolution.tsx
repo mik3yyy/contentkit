@@ -1,33 +1,36 @@
 import Link from "next/link"
 
+// All icons served from /public/icons/ — never broken, no external CDN dependency.
+// white: true  → CSS filter makes path white (for colored/dark backgrounds)
+// white: false → CSS filter makes path black (for bright yellow backgrounds)
 const APPS = [
-  { name: "TikTok",          icon: "https://cdn.simpleicons.org/tiktok/ffffff",          bg: "#010101" },
-  { name: "Instagram",       icon: "https://cdn.simpleicons.org/instagram/ffffff",       bg: "#E1306C" },
-  { name: "YouTube",         icon: "https://cdn.simpleicons.org/youtube/ffffff",         bg: "#FF0000" },
-  { name: "Canva",           icon: "https://cdn.simpleicons.org/canva/ffffff",           bg: "#00C4CC" },
-  { name: "DaVinci Resolve", icon: "https://cdn.simpleicons.org/davinciresolve/ffffff",  bg: "#233A51" },
-  { name: "Snapchat",        icon: "https://cdn.simpleicons.org/snapchat/000000",        bg: "#FFFC00" },
-  { name: "Pinterest",       icon: "https://cdn.simpleicons.org/pinterest/ffffff",       bg: "#E60023" },
-  { name: "Facebook",        icon: "https://cdn.simpleicons.org/facebook/ffffff",        bg: "#1877F2" },
-  { name: "X",               icon: "https://cdn.simpleicons.org/x/ffffff",              bg: "#000000" },
-  { name: "Shopify",         icon: "https://cdn.simpleicons.org/shopify/ffffff",         bg: "#96BF48" },
-  { name: "LinkedIn",        icon: "https://cdn.simpleicons.org/linkedin/ffffff",        bg: "#0A66C2" },
-  { name: "Twitch",          icon: "https://cdn.simpleicons.org/twitch/ffffff",          bg: "#9146FF" },
-  { name: "Discord",         icon: "https://cdn.simpleicons.org/discord/ffffff",         bg: "#5865F2" },
-  { name: "Patreon",         icon: "https://cdn.simpleicons.org/patreon/ffffff",         bg: "#FF424D" },
-  { name: "Etsy",            icon: "https://cdn.simpleicons.org/etsy/ffffff",            bg: "#F1641E" },
-  { name: "Gumroad",         icon: "https://cdn.simpleicons.org/gumroad/ffffff",         bg: "#36A9AE" },
-  { name: "Ko-fi",           icon: "https://cdn.simpleicons.org/kofi/ffffff",            bg: "#FF5E5B" },
-  { name: "Notion",          icon: "https://cdn.simpleicons.org/notion/ffffff",          bg: "#000000" },
-  { name: "Figma",           icon: "https://cdn.simpleicons.org/figma/ffffff",           bg: "#F24E1E" },
-  { name: "WhatsApp",        icon: "https://cdn.simpleicons.org/whatsapp/ffffff",        bg: "#25D366" },
-  { name: "Telegram",        icon: "https://cdn.simpleicons.org/telegram/ffffff",        bg: "#26A5E4" },
-  { name: "Substack",        icon: "https://cdn.simpleicons.org/substack/ffffff",        bg: "#FF6719" },
-  { name: "Stripe",          icon: "https://cdn.simpleicons.org/stripe/ffffff",          bg: "#635BFF" },
-  { name: "Threads",         icon: "https://cdn.simpleicons.org/threads/ffffff",         bg: "#000000" },
-  { name: "Beehiiv",         icon: "https://cdn.simpleicons.org/convertkit/ffffff",      bg: "#FB6970" },
-  { name: "WooCommerce",     icon: "https://cdn.simpleicons.org/woocommerce/ffffff",     bg: "#96588A" },
-  { name: "Mailchimp",       icon: "https://cdn.simpleicons.org/mailchimp/ffffff",       bg: "#FFE01B" },
+  { name: "TikTok",          icon: "/icons/tiktok.svg",         bg: "#010101", white: true  },
+  { name: "Instagram",       icon: "/icons/instagram.svg",      bg: "#E1306C", white: true  },
+  { name: "YouTube",         icon: "/icons/youtube.svg",        bg: "#FF0000", white: true  },
+  { name: "Canva",           icon: "/icons/canva.svg",          bg: "#00C4CC", white: true  },
+  { name: "DaVinci Resolve", icon: "/icons/davinciresolve.svg", bg: "#233A51", white: true  },
+  { name: "Snapchat",        icon: "/icons/snapchat.svg",       bg: "#FFFC00", white: false },
+  { name: "Pinterest",       icon: "/icons/pinterest.svg",      bg: "#E60023", white: true  },
+  { name: "Facebook",        icon: "/icons/facebook.svg",       bg: "#1877F2", white: true  },
+  { name: "X",               icon: "/icons/x.svg",             bg: "#000000", white: true  },
+  { name: "Shopify",         icon: "/icons/shopify.svg",        bg: "#96BF48", white: true  },
+  { name: "LinkedIn",        icon: "/icons/linkedin.svg",       bg: "#0A66C2", white: true  },
+  { name: "Twitch",          icon: "/icons/twitch.svg",         bg: "#9146FF", white: true  },
+  { name: "Discord",         icon: "/icons/discord.svg",        bg: "#5865F2", white: true  },
+  { name: "Patreon",         icon: "/icons/patreon.svg",        bg: "#FF424D", white: true  },
+  { name: "Etsy",            icon: "/icons/etsy.svg",           bg: "#F1641E", white: true  },
+  { name: "Gumroad",         icon: "/icons/gumroad.svg",        bg: "#36A9AE", white: true  },
+  { name: "Ko-fi",           icon: "/icons/kofi.svg",           bg: "#FF5E5B", white: true  },
+  { name: "Notion",          icon: "/icons/notion.svg",         bg: "#000000", white: true  },
+  { name: "Figma",           icon: "/icons/figma.svg",          bg: "#F24E1E", white: true  },
+  { name: "WhatsApp",        icon: "/icons/whatsapp.svg",       bg: "#25D366", white: true  },
+  { name: "Telegram",        icon: "/icons/telegram.svg",       bg: "#26A5E4", white: true  },
+  { name: "Substack",        icon: "/icons/substack.svg",       bg: "#FF6719", white: true  },
+  { name: "Stripe",          icon: "/icons/stripe.svg",         bg: "#635BFF", white: true  },
+  { name: "Threads",         icon: "/icons/threads.svg",        bg: "#000000", white: true  },
+  { name: "Beehiiv",         icon: "/icons/beehiiv.svg",        bg: "#FB6970", white: true  },
+  { name: "WooCommerce",     icon: "/icons/woocommerce.svg",    bg: "#96588A", white: true  },
+  { name: "Mailchimp",       icon: "/icons/mailchimp.svg",      bg: "#FFE01B", white: false },
 ]
 
 const MOCK_IMAGES = [
@@ -140,7 +143,13 @@ export default function TheSolution() {
                   style={{ background: app.bg }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={app.icon} alt={app.name} width={17} height={17} />
+                  <img
+                    src={app.icon}
+                    alt={app.name}
+                    width={17}
+                    height={17}
+                    style={{ filter: app.white ? "brightness(0) invert(1)" : "brightness(0)" }}
+                  />
                 </div>
                 <span className="text-[13.5px] font-semibold text-gray-500 whitespace-nowrap">{app.name}</span>
               </div>

@@ -102,10 +102,18 @@ export default function VideoMarqueeStrip({
   }, [eager])
 
   const videoItems = items.filter(i => i.videoUrl)
-  // 6 per strip keeps memory lean; doubled for seamless CSS marquee loop.
-  // The browser serves the second copy from cache (same URL), so no extra network hit.
-  const capped = videoItems.slice(0, 6)
-  const doubled = [...capped, ...capped]
+  const unique = videoItems.slice(0, 6)
+
+  // The first copy of the marquee must be wider than the viewport or a visible gap
+  // appears when the CSS animation nears the -50% loop point.
+  // stride = cardW + gap(10). For 1920px viewport: ceil(1920/stride) + 2 items needed.
+  const stride = cardW + 10
+  const minLen = Math.ceil(1920 / stride) + 2
+  const firstCopy = unique.length > 0
+    ? Array.from({ length: Math.max(minLen, unique.length) }, (_, i) => unique[i % unique.length])
+    : []
+  // Doubled for seamless loop. Browser caches same-URL videos so no extra network cost.
+  const doubled = [...firstCopy, ...firstCopy]
   const cls = direction === "reverse" ? "marquee-rev" : speed === "slow" ? "marquee-slow" : "marquee"
 
   return (
