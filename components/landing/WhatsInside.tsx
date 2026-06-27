@@ -17,34 +17,54 @@ const TEMPLATES = ["Offer Page","Welcome Email","Hook List","Content Plan","Lead
 export type ClipItem  = { id: string; videoUrl: string; thumbnailUrl: string | null }
 export type EbookItem = { id: string; thumbnailUrl: string | null; title: string }
 
-// ── Autoplay video — preloads when near viewport so it's already playing when visible ──
+// ── Autoplay video — lazy mount + play when near viewport ────────────────────
 
 function AutoplayVideo({ src, className }: { src: string; className?: string }) {
-  const ref = useRef<HTMLVideoElement>(null)
-  const [playing, setPlaying] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const ref     = useRef<HTMLVideoElement>(null)
+  const [playing,  setPlaying]  = useState(false)
+  const [mounted,  setMounted]  = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const v = ref.current
-    if (!v) return
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) v.play().catch(() => {})
-        else v.pause()
-      },
-      { threshold: 0.1, rootMargin: "300px 0px 0px 0px" }
-    )
-    obs.observe(v)
-    return () => obs.disconnect()
+    const mobile = window.innerWidth < 768
+    setIsMobile(mobile)
   }, [])
 
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    // Mobile: only mount+play when actually in view (tight margin).
+    // Desktop: preload 300px ahead so video is ready before visible.
+    const margin = isMobile ? "40px 0px" : "300px 0px"
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setMounted(true)
+          ref.current?.play().catch(() => {})
+        } else {
+          ref.current?.pause()
+        }
+      },
+      { threshold: 0.1, rootMargin: margin }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [isMobile])
+
   return (
-    <video
-      ref={ref}
-      src={src}
-      autoPlay muted loop playsInline preload="auto"
-      className={`${className ?? ""} transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
-      onPlaying={() => setPlaying(true)}
-    />
+    <div ref={wrapRef} className={className} style={{ position: "absolute", inset: 0 }}>
+      {mounted && (
+        <video
+          ref={ref}
+          src={src}
+          autoPlay muted loop playsInline
+          preload={isMobile ? "metadata" : "auto"}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
+          onPlaying={() => setPlaying(true)}
+        />
+      )}
+    </div>
   )
 }
 
@@ -166,7 +186,7 @@ export default function WhatsInside({
                   className={`relative rounded-xl overflow-hidden bg-gray-200 ${idx >= 3 ? "hidden md:block" : ""}`}
                   style={{ height: 175 }}
                 >
-                  <AutoplayVideo src={item.videoUrl} className="absolute inset-0 w-full h-full object-cover" />
+                  <AutoplayVideo src={item.videoUrl} />
                 </div>
               ))}
             </div>

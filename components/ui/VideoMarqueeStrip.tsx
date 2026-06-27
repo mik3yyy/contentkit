@@ -18,39 +18,53 @@ interface Props {
   eager?: boolean
 }
 
-function VideoCard({ item, mounted, cardW, cardH }: {
-  item: VideoItem; mounted: boolean; cardW: number; cardH: number
+function VideoCard({ item, mounted, isMobile, cardW, cardH }: {
+  item: VideoItem
+  mounted: boolean    // desktop: strip-level gate
+  isMobile: boolean   // mobile: per-card gate
+  cardW: number
+  cardH: number
 }) {
   const cardRef  = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [playing, setPlaying] = useState(false)
-  // Track current intersection state so we can play immediately when video mounts.
+  const [playing,     setPlaying]     = useState(false)
+  const [selfMounted, setSelfMounted] = useState(false)  // mobile only
   const inView = useRef(false)
 
-  // Observer on the div (always in DOM). Controls play/pause only — never unmount.
+  // Per-card observer — always on the div.
+  // Desktop: controls play/pause only (video already mounted by strip).
+  // Mobile: also gates whether the video element exists (per-card lazy).
   useEffect(() => {
     const el = cardRef.current
     if (!el) return
     const obs = new IntersectionObserver(
       ([entry]) => {
         inView.current = entry.isIntersecting
+        // Mobile: mount this card's video when it enters the viewport.
+        if (isMobile && entry.isIntersecting) setSelfMounted(true)
         const v = videoRef.current
         if (!v) return
         if (entry.isIntersecting) v.play().catch(() => {})
         else v.pause()
       },
-      { threshold: 0.01 }
+      // Mobile: 80px lookahead so video loads just before visible.
+      // Desktop: no margin needed — strip-level preloading handles it.
+      { threshold: 0.01, rootMargin: isMobile ? "80px 0px" : "0px" }
     )
     obs.observe(el)
     return () => obs.disconnect()
-  }, [])
+  }, [isMobile])
 
-  // When the video element mounts (strip enters preload zone), play if card is already visible.
+  // Desktop: when the strip mounts all videos, play if this card is already in view.
   useEffect(() => {
+    if (isMobile) return
     const v = videoRef.current
     if (!v || !mounted) return
     if (inView.current) v.play().catch(() => {})
-  }, [mounted])
+  }, [mounted, isMobile])
+
+  // Desktop: strip gate. Mobile: per-card gate.
+  const shouldMount = isMobile ? selfMounted : mounted
 
   return (
     <div
@@ -58,7 +72,7 @@ function VideoCard({ item, mounted, cardW, cardH }: {
       className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-200"
       style={{ width: cardW, height: cardH }}
     >
-      {mounted && item.videoUrl && (
+      {shouldMount && item.videoUrl && (
         <video
           ref={videoRef}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`}
@@ -67,7 +81,9 @@ function VideoCard({ item, mounted, cardW, cardH }: {
           muted
           loop
           playsInline
-          preload="auto"
+          // Desktop: auto so all strip videos preload before visible.
+          // Mobile: metadata to avoid any buffering until play() is called.
+          preload={isMobile ? "metadata" : "auto"}
           onPlaying={() => setPlaying(true)}
         />
       )}
@@ -84,13 +100,27 @@ export default function VideoMarqueeStrip({
   cardH = 210,
   eager = false,
 }: Props) {
-  // eager=true (hero): mount all videos immediately on page load — highest priority.
-  // eager=false (below fold): mount all videos when strip is 600px from viewport.
-  const [mounted, setMounted] = useState(eager)
+  // Always start unmounted — useEffect detects device and sets the right strategy.
+  const [mounted,  setMounted]  = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const stripRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (eager) return
+    const mobile = window.innerWidth < 768
+    setIsMobile(mobile)
+
+    if (mobile) {
+      // Mobile: per-card lazy loading in VideoCard handles everything. No strip-level mount.
+      return
+    }
+
+    // Desktop eager (hero): mount all videos immediately.
+    if (eager) {
+      setMounted(true)
+      return
+    }
+
+    // Desktop non-eager: mount all videos when strip is 600px from viewport.
     const el = stripRef.current
     if (!el) return
     const obs = new IntersectionObserver(
@@ -103,16 +133,16 @@ export default function VideoMarqueeStrip({
 
   const videoItems = items.filter(i => i.videoUrl)
   const unique = videoItems.slice(0, 6)
-
-  // The first copy of the marquee must be wider than the viewport or a visible gap
-  // appears when the CSS animation nears the -50% loop point.
-  // stride = cardW + gap(10). For 1920px viewport: ceil(1920/stride) + 2 items needed.
   const stride = cardW + 10
-  const minLen = Math.ceil(1920 / stride) + 2
+
+  // Mobile screens (~430px) need far fewer cards than desktop (1920px).
+  // Each firstCopy must be wider than the screen or the seamless loop shows a gap.
+  const minLen = isMobile
+    ? Math.ceil(430 / stride) + 1   // ~4 items → 8 doubled — light on mobile
+    : Math.ceil(1920 / stride) + 2  // ~14 items → 28 doubled — gap-free on desktop
   const firstCopy = unique.length > 0
     ? Array.from({ length: Math.max(minLen, unique.length) }, (_, i) => unique[i % unique.length])
     : []
-  // Doubled for seamless loop. Browser caches same-URL videos so no extra network cost.
   const doubled = [...firstCopy, ...firstCopy]
   const cls = direction === "reverse" ? "marquee-rev" : speed === "slow" ? "marquee-slow" : "marquee"
 
@@ -127,7 +157,14 @@ export default function VideoMarqueeStrip({
     >
       <div className={`${cls} px-3`} style={{ gap: 10 }}>
         {doubled.map((item, i) => (
-          <VideoCard key={`${item.id}-${i}`} item={item} mounted={mounted} cardW={cardW} cardH={cardH} />
+          <VideoCard
+            key={`${item.id}-${i}`}
+            item={item}
+            mounted={mounted}
+            isMobile={isMobile}
+            cardW={cardW}
+            cardH={cardH}
+          />
         ))}
       </div>
     </div>
