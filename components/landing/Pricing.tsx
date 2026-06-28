@@ -5,7 +5,6 @@ const FEATURES = [
   "5,000+ rebrandable ebooks, templates, sounds, presets, and lead magnets",
   "Full resell rights so you can post, bundle, edit, resell, or hand assets to clients",
   "Lifetime access, lifetime updates, no monthly subscription, no credit card tricks",
-  "Affiliate program access — earn 60% commission",
 ]
 
 export default function Pricing() {
