@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!session) redirect("/sign-in")
   const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
-  if (!isDemo && !session.user?.hasPaid) redirect("/checkout")
+  if (!isDemo && !session.user?.hasPaid) redirect("/#pricing")
 
   return (
     <DashboardShell userName={session.user?.name}>
