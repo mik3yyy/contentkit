@@ -33,23 +33,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token }) {
       if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
         token.hasPaid = true
+        token.subscriptionStatus = "active"
         return token
       }
       if (token.email) {
         try {
           const user = await prisma.user.findUnique({
             where: { email: token.email },
-            select: { hasPaid: true },
+            select: { hasPaid: true, subscriptionStatus: true },
           })
           token.hasPaid = user?.hasPaid ?? false
+          token.subscriptionStatus = user?.subscriptionStatus ?? null
         } catch {
           token.hasPaid = false
+          token.subscriptionStatus = null
         }
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) session.user.hasPaid = token.hasPaid as boolean
+      if (session.user) {
+        session.user.hasPaid = token.hasPaid as boolean
+        session.user.subscriptionStatus = token.subscriptionStatus as string | null
+      }
       return session
     },
   },

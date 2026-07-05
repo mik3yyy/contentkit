@@ -12,3 +12,6 @@ export function getStripe(): Stripe {
 }
 
 export const PRICE_CENTS = 1200 // $12.00 (discounted from $80)
+
+export const GENERATE_PRICE_ID = process.env.STRIPE_GENERATE_PRICE_ID! // AI Generator monthly subscription, $19/mo
+export const GENERATE_CREDITS_PER_CYCLE = 2000

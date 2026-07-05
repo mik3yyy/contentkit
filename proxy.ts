@@ -11,5 +11,5 @@ export const proxy = auth((request) => {
 })
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/generate/:path*"],
 }

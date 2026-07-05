@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 import { headers } from "next/headers"
-import { getStripe } from "@/lib/stripe"
+import { getStripe, GENERATE_CREDITS_PER_CYCLE } from "@/lib/stripe"
 import { prisma } from "@/lib/db"
 
 export async function POST(req: NextRequest) {
@@ -41,6 +41,51 @@ export async function POST(req: NextRequest) {
         where: { email },
         update: { hasPaid: true, paidAt: new Date(), stripePaymentId: pi.id },
         create: { email, hasPaid: true, paidAt: new Date(), stripePaymentId: pi.id },
+      })
+    }
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const checkoutSession = event.data.object
+    if (checkoutSession.mode === "subscription" && checkoutSession.metadata?.userId) {
+      const subscriptionId = checkoutSession.subscription as string
+      const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
+      await prisma.user.update({
+        where: { id: checkoutSession.metadata.userId },
+        data: {
+          subscriptionId: subscription.id,
+          subscriptionStatus: subscription.status,
+          currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
+          credits: GENERATE_CREDITS_PER_CYCLE,
+        },
+      })
+    }
+  }
+
+  if (event.type === "customer.subscription.updated") {
+    const subscription = event.data.object
+    const user = await prisma.user.findFirst({ where: { subscriptionId: subscription.id } })
+    if (user) {
+      const newPeriodEnd = new Date(subscription.items.data[0].current_period_end * 1000)
+      const isNewCycle = !user.currentPeriodEnd || newPeriodEnd.getTime() > user.currentPeriodEnd.getTime()
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          subscriptionStatus: subscription.status,
+          currentPeriodEnd: newPeriodEnd,
+          ...(isNewCycle && subscription.status === "active" ? { credits: GENERATE_CREDITS_PER_CYCLE } : {}),
+        },
+      })
+    }
+  }
+
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object
+    const user = await prisma.user.findFirst({ where: { subscriptionId: subscription.id } })
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { subscriptionStatus: "canceled" },
       })
     }
   }

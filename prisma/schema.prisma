@@ -8,17 +8,24 @@ datasource db {
 }
 
 model User {
-  id              String     @id @default(cuid())
-  email           String     @unique
-  name            String?
-  image           String?
-  password        String?
-  hasPaid         Boolean    @default(false)
-  paidAt          DateTime?
-  stripePaymentId String?
-  favorites       Favorite[]
-  downloads       Download[]
-  createdAt       DateTime   @default(now())
+  id                 String           @id @default(cuid())
+  email              String           @unique
+  name               String?
+  image              String?
+  password           String?
+  hasPaid            Boolean          @default(false)
+  paidAt             DateTime?
+  stripePaymentId    String?
+  stripeCustomerId   String?
+  subscriptionId     String?
+  subscriptionStatus String? // active | past_due | canceled | null
+  currentPeriodEnd   DateTime?
+  credits            Int              @default(0)
+  generateOnboarding Json? // answers from the /generate first-visit questions; null until completed
+  favorites          Favorite[]
+  downloads          Download[]
+  generationJobs     GenerationJob[]
+  createdAt          DateTime         @default(now())
 }
 
 model Content {
@@ -31,9 +38,30 @@ model Content {
   fileSizeBytes Int?
   durationSeconds Int?
   tags          String[]
+  description   String?
+  role          String? // standalone | broll | null
   favorites     Favorite[]
   downloads     Download[]
+  generationJobs GenerationJob[]
   createdAt     DateTime   @default(now())
+}
+
+model GenerationJob {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode         String // "niche-only" | "clipping"; "compilation" reserved
+  status       String // pending | processing | completed | failed
+  niche        String?
+  contentId    String?
+  content      Content? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  creditsCost  Int
+  sourceR2Key  String? // user-uploaded source video (clipping mode)
+  outputR2Key  String? // rendered result (clipping mode)
+  selections   Json? // ordered list of broll segments used in the render, editable before finalizing
+  errorMessage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 }
 
 model Favorite {

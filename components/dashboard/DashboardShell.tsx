@@ -28,6 +28,7 @@ function Icon({ name }: { name: string }) {
     case "settings": return <svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     case "signout":  return <svg {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     case "help":     return <svg {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    case "sparkles": return <svg {...p}><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
     default:         return null
   }
 }
@@ -65,6 +66,12 @@ function SidebarNav({ onClose }: { onClose: () => void }) {
         className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] mb-1 transition-colors ${pathname === "/dashboard" && !onLibrary ? "bg-black text-white font-medium" : "text-gray-700 hover:bg-gray-50"}`}
         onClick={onClose}>
         <Icon name="home" />Home
+      </Link>
+
+      <Link href="/generate"
+        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] mb-1 mt-1 bg-gradient-to-r from-indigo-500 to-indigo-400 text-white font-medium hover:from-indigo-400 hover:to-indigo-300 transition-colors"
+        onClick={onClose}>
+        <Icon name="sparkles" />ContentKit AI
       </Link>
 
       <span className="block text-[10px] font-semibold text-gray-400 uppercase tracking-[0.08em] px-2 mt-5 mb-1.5">Library</span>

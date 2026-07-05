@@ -1,0 +1,28 @@
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { prisma } from "@/lib/db"
+import ClipUploadForm from "./ClipUploadForm"
+
+export default async function ClipPage() {
+  const session = await auth()
+  if (!session?.user?.email) redirect("/sign-in?callbackUrl=/generate/clip")
+
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+  if (!user) redirect("/sign-in?callbackUrl=/generate/clip")
+  if (!isDemo && user.subscriptionStatus !== "active") redirect("/generate/upgrade")
+
+  const nicheCounts = await prisma.content.groupBy({
+    by: ["niche"],
+    where: { type: "video", role: "broll" },
+    _count: { id: true },
+    orderBy: { _count: { id: "desc" } },
+  })
+
+  return (
+    <ClipUploadForm
+      credits={user.credits}
+      niches={nicheCounts.map(n => ({ niche: n.niche, count: n._count.id }))}
+    />
+  )
+}
