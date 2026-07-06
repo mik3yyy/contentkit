@@ -2,23 +2,23 @@
 
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
-import { getJobStatus, regenerateSegment, type Segment } from "../../actions"
+import { getJobStatus, regenerateScriptSegment, type ScriptSegment } from "../../actions"
 
 type JobState = {
   status: string
   errorMessage: string | null
-  selections: Segment[] | null
+  selections: ScriptSegment[] | null
   downloadUrl: string | null
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Analyzing your video and picking clips…",
+  pending: "Matching clips to your script…",
   processing: "Rendering your video…",
   completed: "Done",
   failed: "Something went wrong",
 }
 
-export default function JobStatusClient({ jobId }: { jobId: string }) {
+export default function ScriptJobStatusClient({ jobId }: { jobId: string }) {
   const [job, setJob] = useState<JobState | null>(null)
   const [swapping, setSwapping] = useState<number | null>(null)
 
@@ -35,7 +35,7 @@ export default function JobStatusClient({ jobId }: { jobId: string }) {
 
   async function handleSwap(index: number) {
     setSwapping(index)
-    await regenerateSegment(jobId, index)
+    await regenerateScriptSegment(jobId, index)
     await poll()
     // Worker needs a moment to pick the job back up and re-render; keep polling.
     const watchInterval = setInterval(async () => {
@@ -57,7 +57,7 @@ export default function JobStatusClient({ jobId }: { jobId: string }) {
       <div className="max-w-lg mx-auto px-6 py-24 text-center">
         <h1 className="text-[22px] font-bold mb-3">Something went wrong</h1>
         <p className="text-white/50 text-[14px] mb-8">{job.errorMessage ?? "The render failed. Please try again."}</p>
-        <Link href="/generate/clip" className="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold text-[14px] rounded-xl px-5 py-2.5 transition-colors inline-block">
+        <Link href="/generate/script" className="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold text-[14px] rounded-xl px-5 py-2.5 transition-colors inline-block">
           Try again
         </Link>
       </div>
@@ -74,9 +74,7 @@ export default function JobStatusClient({ jobId }: { jobId: string }) {
     )
   }
 
-  const brollSegments = (job.selections ?? [])
-    .map((seg, index) => ({ seg, index }))
-    .filter((x): x is { seg: Extract<Segment, { type: "broll" }>; index: number } => x.seg.type === "broll")
+  const segments = job.selections ?? []
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-14">
@@ -87,21 +85,24 @@ export default function JobStatusClient({ jobId }: { jobId: string }) {
         <video src={job.downloadUrl} controls className="w-full max-w-sm rounded-2xl border border-white/10 mb-8 mx-auto block" />
       )}
 
-      <h2 className="text-[15px] font-semibold mb-4">Inserted clips</h2>
+      <h2 className="text-[15px] font-semibold mb-4">Clips used</h2>
       <div className="space-y-2 mb-8">
-        {brollSegments.map(({ seg, index }) => (
-          <div key={index} className="flex items-center justify-between border border-white/10 rounded-xl px-4 py-3">
-            <span className="text-[13px] text-white/70">{seg.title}</span>
+        {segments.map((seg, index) => (
+          <div key={index} className="flex items-center justify-between border border-white/10 rounded-xl px-4 py-3 gap-4">
+            <div className="min-w-0">
+              <p className="text-[13px] text-white/70 truncate">{seg.title}</p>
+              <p className="text-[12px] text-white/40 truncate">&quot;{seg.captionText}&quot;</p>
+            </div>
             <button
               onClick={() => handleSwap(index)}
               disabled={swapping !== null}
-              className="text-[12px] font-semibold text-indigo-400 hover:text-indigo-300 disabled:opacity-40 transition-colors"
+              className="shrink-0 text-[12px] font-semibold text-indigo-400 hover:text-indigo-300 disabled:opacity-40 transition-colors"
             >
               {swapping === index ? "Swapping…" : "Swap clip"}
             </button>
           </div>
         ))}
-        {brollSegments.length === 0 && <p className="text-white/40 text-[13px]">No cutaway clips were inserted.</p>}
+        {segments.length === 0 && <p className="text-white/40 text-[13px]">No clips were selected.</p>}
       </div>
 
       {job.downloadUrl && (

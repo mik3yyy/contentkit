@@ -39,11 +39,15 @@ export default function ModePicker({ credits, niches }: { credits: number; niche
           cost="100 credits"
           active
         />
-        <ModeCard
-          title="Script to video"
-          description="Type what you want the video to say — we assemble matching clips, captions, and optional AI voiceover. Comes with a full editor to tweak before you download."
-          cost="Coming soon"
-        />
+        <Link href="/generate/script">
+          <ModeCard
+            title="Script to video"
+            description="Type what you want the video to say — we assemble matching clips, captions, and optional AI voiceover. Comes with a full editor to tweak before you download."
+            cost="300 credits"
+            active
+            clickable
+          />
+        </Link>
         <Link href="/generate/clip">
           <ModeCard
             title="Clip your own footage"

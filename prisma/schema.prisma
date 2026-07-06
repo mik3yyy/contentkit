@@ -50,15 +50,17 @@ model GenerationJob {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mode         String // "niche-only" | "clipping"; "compilation" reserved
+  mode         String // "niche-only" | "clipping" | "script"
   status       String // pending | processing | completed | failed
   niche        String?
   contentId    String?
   content      Content? @relation(fields: [contentId], references: [id], onDelete: SetNull)
   creditsCost  Int
   sourceR2Key  String? // user-uploaded source video (clipping mode)
-  outputR2Key  String? // rendered result (clipping mode)
-  selections   Json? // ordered list of broll segments used in the render, editable before finalizing
+  outputR2Key  String? // rendered result (clipping/script mode)
+  selections   Json? // ordered list of clip/broll segments used in the render, editable before finalizing
+  script       String? // user-entered script text (script mode)
+  voiceover    Boolean  @default(false) // whether to synthesize + mux an AI voiceover track (script mode)
   errorMessage String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
